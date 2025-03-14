@@ -11,6 +11,7 @@ const IngredientSelector = () => {
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [mealResponse, setMealResponse] = useState<{ meal: string, ingredients: string[], instructions: string } | null>(null);
+    const [loading, setLoading] = useState(false); // Loading state
 
     useEffect(() => {
         const loadIngredients = async () => {
@@ -38,6 +39,8 @@ const IngredientSelector = () => {
             return;
         }
 
+        setLoading(true); // Show loading state
+
         try {
             const response = await axios.post(`${API_BASE_URL}/generate-meal`, {
                 ingredients: selectedIngredients,
@@ -47,6 +50,8 @@ const IngredientSelector = () => {
             setMealResponse(response.data);
         } catch (error) {
             console.error("Error fetching meals:", error);
+        } finally {
+            setLoading(false); // Hide loading state
         }
     };
 
@@ -63,7 +68,7 @@ const IngredientSelector = () => {
                 {ingredients
                     .filter(ingredient => ingredient.toLowerCase().includes(searchTerm.toLowerCase()))
                     .map((ingredient, index) => (
-                        <li key={index} onClick={() => toggleIngredient(ingredient)}
+                        <li key={index} onClick={() => toggleIngredient(ingredient)} 
                             style={{ cursor: "pointer", fontWeight: selectedIngredients.includes(ingredient) ? "bold" : "normal" }}>
                             {ingredient} {selectedIngredients.includes(ingredient) ? "✅" : ""}
                         </li>
@@ -74,7 +79,14 @@ const IngredientSelector = () => {
 
             <TagList onSelectTags={setSelectedTags} />
 
-            <button onClick={findMeals} style={{ marginTop: "10px", padding: "10px", cursor: "pointer" }}>Find Meals</button>
+            {/* 🔥 Loading Spinner */}
+            {loading ? (
+                <p>Loading meals... 🔄</p>
+            ) : (
+                <button onClick={findMeals} style={{ marginTop: "10px", padding: "10px", cursor: "pointer" }} disabled={loading}>
+                    {loading ? "Finding Meals..." : "Find Meals"}
+                </button>
+            )}
 
             {mealResponse && (
                 <div>
@@ -84,7 +96,6 @@ const IngredientSelector = () => {
                     <p><strong>Instructions:</strong> {mealResponse.instructions || "No instructions available"}</p>
                 </div>
             )}
-
         </div>
     );
 };
