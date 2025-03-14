@@ -33,8 +33,9 @@ class MealPlannerController extends Controller
 
         // AI Prompt
         $prompt = "Generate a meal using these ingredients: " . implode(", ", $ingredients) .
-            ". Consider these dietary preferences: " . implode(", ", $tags) . ".";
-
+              ". Consider these dietary preferences: " . implode(", ", $tags) . "." .
+              " Return the meal name, a list of ingredients, and step-by-step instructions.";
+              
         // API Configuration
         $apiUrl = env('PHI3_API_URL');
         $apiKey = env('PHI3_API_KEY');
