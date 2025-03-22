@@ -45,7 +45,11 @@ class MealPlannerController extends Controller
         }
 
         try {
-            $client = new Client();
+            // 1) Disable SSL verification for dev (NOT for production)
+            $client = new Client([
+                'verify' => false,
+            ]);
+
             $response = $client->post($apiUrl, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $apiKey,
@@ -71,7 +75,7 @@ class MealPlannerController extends Controller
 
             return response()->json([
                 'meal' => 'AI Suggested Meal',
-                'ingredients' => [], // Empty array for now to avoid undefined error
+                'ingredients' => [],
                 'instructions' => $data['choices'][0]['message']['content'],
             ]);
         } catch (\Exception $e) {
@@ -108,63 +112,69 @@ class MealPlannerController extends Controller
     }
 
     private function askAI($prompt)
-{
-    $apiUrl = env('PHI3_API_URL');
-    $apiKey = env('PHI3_API_KEY');
+    {
+        $apiUrl = env('PHI3_API_URL');
+        $apiKey = env('PHI3_API_KEY');
 
-    try {
-        $client = new Client();
-        $response = $client->post($apiUrl, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type' => 'application/json',
-            ],
-            'json' => [
-                'messages' => [
-                    ['role' => 'system', 'content' => 'You are an expert chef. Always return a JSON object with this structure: {"meal": "Meal Name", "ingredients": ["ingredient1", "ingredient2"], "instructions": "Step-by-step instructions"}. Do NOT include anything outside of this JSON format.'],
-                    ['role' => 'user', 'content' => $prompt]
+        try {
+            // 1) Disable SSL verification for dev (NOT for production)
+            $client = new Client([
+                'verify' => false,
+            ]);
+
+            $response = $client->post($apiUrl, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Content-Type' => 'application/json',
                 ],
-                'model' => 'gpt-4o',
-                'temperature' => 1,
-                'max_tokens' => 4096,
-                'top_p' => 1
-            ],
-        ]);
+                'json' => [
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => 'You are an expert chef. Always return a JSON object with this structure: {"meal": "Meal Name", "ingredients": ["ingredient1", "ingredient2"], "instructions": "Step-by-step instructions"}. Do NOT include anything outside of this JSON format.'
+                        ],
+                        ['role' => 'user', 'content' => $prompt]
+                    ],
+                    'model' => 'gpt-4o',
+                    'temperature' => 1,
+                    'max_tokens' => 4096,
+                    'top_p' => 1
+                ],
+            ]);
 
-        // Get AI raw response
-        $responseBody = $response->getBody()->getContents();
-        Log::info("🔍 AI Raw Response: " . $responseBody);
+            // Get AI raw response
+            $responseBody = $response->getBody()->getContents();
+            Log::info("🔍 AI Raw Response: " . $responseBody);
 
-        $data = json_decode($responseBody, true);
+            $data = json_decode($responseBody, true);
 
-        // Check if AI returned a valid structure
-        if (!isset($data['choices'][0]['message']['content'])) {
-            Log::error("❌ AI Response Missing Content: " . json_encode($data));
-            return response()->json(['error' => 'AI returned an invalid format', 'raw_response' => $data], 500);
+            // Check if AI returned a valid structure
+            if (!isset($data['choices'][0]['message']['content'])) {
+                Log::error("❌ AI Response Missing Content: " . json_encode($data));
+                return response()->json(['error' => 'AI returned an invalid format', 'raw_response' => $data], 500);
+            }
+
+            // Get the AI's message content
+            $content = $data['choices'][0]['message']['content'];
+            Log::info("🛠️ AI Content Before Parsing: " . $content);
+
+            // 2) Strip code fences (```json ... ```), if present
+            $content = str_replace(["```json", "```"], "", $content);
+
+            // Attempt to parse the JSON
+            $aiResponse = json_decode($content, true);
+
+            // Check if JSON decoding was successful
+            if (!is_array($aiResponse) || !isset($aiResponse['meal'])) {
+                Log::error("❌ Invalid AI JSON format: " . $content);
+                return response()->json(['error' => 'AI did not return structured JSON', 'raw_response' => $content], 500);
+            }
+
+            Log::info("✅ Parsed AI Response: " . json_encode($aiResponse));
+            return response()->json($aiResponse);
+        } catch (\Exception $e) {
+            Log::error("🔥 AI API Error: " . $e->getMessage());
+            return response()->json(['error' => 'Error generating meal.', 'details' => $e->getMessage()], 500);
         }
-
-        // ✅ FIX: Decode the JSON inside "content"
-        $content = $data['choices'][0]['message']['content'];
-        Log::info("🛠️ AI Content Before Parsing: " . $content);
-
-        $aiResponse = json_decode($content, true);
-
-        // Check if JSON decoding was successful
-        if (!is_array($aiResponse) || !isset($aiResponse['meal'])) {
-            Log::error("❌ Invalid AI JSON format: " . $content);
-            return response()->json(['error' => 'AI did not return structured JSON', 'raw_response' => $content], 500);
-        }
-
-        Log::info("✅ Parsed AI Response: " . json_encode($aiResponse));
-        return response()->json($aiResponse);
-    } catch (\Exception $e) {
-        Log::error("🔥 AI API Error: " . $e->getMessage());
-        return response()->json(['error' => 'Error generating meal.', 'details' => $e->getMessage()], 500);
     }
 }
-
-}
-
-
-// Log::info("API Key: " . env('PHI3_API_KEY'));
-// Log::info("API URL: " . env('PHI3_API_URL'));
