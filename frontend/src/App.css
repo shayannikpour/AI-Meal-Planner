@@ -1,42 +1,157 @@
-#root {
-  max-width: 1280px;
+/* App.css */
+.app-container {
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  font-family: 'Inter', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(230, 230, 230, 0.8);
+  position: relative;
+}
+
+/* Center the header title when on home page */
+.app-header.home-header {
+  justify-content: center;
+}
+
+/* Regular header (non-home) should keep space-between alignment */
+.app-header:not(.home-header) {
+  justify-content: space-between;
+}
+
+.app-header h1 {
+  color: #2c3e50;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(90deg, #4CAF50, #2196F3);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.back-button {
+  background-color: transparent;
+  color: #555;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  border-radius: 6px;
+  /* Remove absolute positioning */
+  position: static;
+}
+
+.back-button:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.main-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 2rem;
+}
+
+.menu-description {
   text-align: center;
+  max-width: 600px;
+  margin-bottom: 3rem;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.menu-description p {
+  font-size: 1.2rem;
+  color: #555;
+  line-height: 1.6;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.menu-options {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.menu-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 2.5rem 1.5rem;
+  width: 100%;
+  max-width: 300px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.menu-button:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.button-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.button-text {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.planner-button {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4eaf5 100%);
+}
+
+.selection-button {
+  background: linear-gradient(135deg, #f8f9fa 0%, #edf7ed 100%);
+}
+
+.content-container {
+  flex: 1;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .menu-options {
+    flex-direction: column;
+    align-items: center;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .menu-button {
+    max-width: 100%;
   }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+  
+  .app-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
   }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+  
+  .back-button {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
 }
