@@ -58,6 +58,11 @@ const App: React.FC = () => {
                     <MealSelection />
                 </div>
             )}
+
+            {/* Footer */}
+            <footer className="app-footer">
+                <p>Team Members: Shayan, Mitchell, Eddie, Jaskunwar</p>
+            </footer>
         </div>
     );
 };

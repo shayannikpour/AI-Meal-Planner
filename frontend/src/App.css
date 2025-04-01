@@ -50,7 +50,6 @@
   transition: all 0.2s;
   font-weight: 500;
   border-radius: 6px;
-  /* Remove absolute positioning */
   position: static;
 }
 
@@ -131,6 +130,16 @@
 .content-container {
   flex: 1;
   width: 100%;
+}
+
+/* Footer styling */
+.app-footer {
+  text-align: center;
+  padding: 1rem 0;
+  border-top: 1px solid rgba(230, 230, 230, 0.8);
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #555;
 }
 
 @media (max-width: 768px) {

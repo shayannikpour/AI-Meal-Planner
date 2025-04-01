@@ -1,21 +1,5 @@
 <?php
 
-// namespace Database\Seeders;
-
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-// use Illuminate\Database\Seeder;
-
-// class MealPlannerSeeder extends Seeder
-// {
-//     /**
-//      * Run the database seeds.
-//      */
-//     public function run(): void
-//     {
-//         //
-//     }
-// }
-
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -36,7 +20,23 @@ class MealPlannerSeeder extends Seeder
             ['name' => 'Cheese'],
             ['name' => 'Beef'],
             ['name' => 'Garlic'],
-            ['name' => 'Olive Oil']
+            ['name' => 'Olive Oil'],
+            // Additional ingredients:
+            ['name' => 'Onion'],
+            ['name' => 'Potato'],
+            ['name' => 'Carrot'],
+            ['name' => 'Bell Pepper'],
+            ['name' => 'Mushrooms'],
+            ['name' => 'Lettuce'],
+            ['name' => 'Avocado'],
+            ['name' => 'Salmon'],
+            ['name' => 'Shrimp'],
+            ['name' => 'Pasta'],
+            ['name' => 'Beans'],
+            ['name' => 'Lentils'],
+            ['name' => 'Tofu'],
+            ['name' => 'Butter'],
+            ['name' => 'Yogurt']
         ]);
 
         // Insert Tags
@@ -48,7 +48,18 @@ class MealPlannerSeeder extends Seeder
             ['name' => 'Vegetarian'],
             ['name' => 'Gluten-Free'],
             ['name' => 'Quick & Easy'],
-            ['name' => 'Budget-Friendly']
+            ['name' => 'Budget-Friendly'],
+            // Additional Tags:
+            ['name' => 'Low Carb'],
+            ['name' => 'High Protein'],
+            ['name' => 'Dairy-Free'],
+            ['name' => 'Nut-Free'],
+            ['name' => 'Paleo'],
+            ['name' => 'Mediterranean'],
+            ['name' => 'Family-Friendly'],
+            ['name' => 'Spicy'],
+            ['name' => 'Comfort Food'],
+            ['name' => 'Seasonal']
         ]);
     }
 }

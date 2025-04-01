@@ -1,0 +1,97 @@
+/* IngredientSelector.css */
+
+/* Container for the entire ingredient selection section */
+.ingredient-selector-container {
+    margin: 20px 0;
+  }
+  
+  /* Heading for the ingredients */
+  .ingredient-selector-heading {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  /* Search bar styling */
+  .ingredient-search {
+    width: 100%;
+    max-width: 300px;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  /* Unordered list for ingredients */
+  .ingredient-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px; /* scroll if too many ingredients */
+    overflow-y: auto;
+  }
+  
+  /* Individual ingredient list items */
+  .ingredient-list li {
+    padding: 8px 0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  /* Hover effect */
+  .ingredient-list li:hover {
+    background-color: #f2f2f2;
+  }
+  
+  /* Class to indicate a selected ingredient */
+  .ingredient-list li.selected {
+    font-weight: bold;
+    color: #007BFF;
+  }
+  
+  /* Selected ingredients display */
+  .selected-ingredients-title {
+    margin-top: 20px;
+    font-weight: bold;
+  }
+  
+  .selected-ingredients-text {
+    font-style: italic;
+    margin-top: 5px;
+  }
+  
+  /* Button styling */
+  .find-meals-button {
+    margin-top: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .find-meals-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .find-meals-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* Meal response styling */
+  .meal-response {
+    margin-top: 20px;
+  }
+  
+  .meal-response h3 {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+  }
+  
+  .meal-response p {
+    margin-bottom: 8px;
+  }
+  

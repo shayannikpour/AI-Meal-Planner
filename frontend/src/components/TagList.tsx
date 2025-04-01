@@ -1,49 +1,66 @@
 import { useEffect, useState } from "react";
 import { fetchTags } from "../api";
 
-const TagList = ({ onSelectTags }: { onSelectTags: (selectedTags: string[]) => void }) => {
-    const [tags, setTags] = useState<string[]>([]);
-    const [selectedTags, setSelectedTags] = useState<string[]>([]);
+interface TagListProps {
+  onSelectTags: (selectedTags: string[]) => void;
+}
 
-    useEffect(() => {
-        const loadTags = async () => {
-            try {
-                const data = await fetchTags();
-                setTags(data.map((tag: { name: string }) => tag.name));
-            } catch (error) {
-                console.error("Error fetching tags:", error);
-            }
-        };
-        loadTags();
-    }, []);
+const TagList = ({ onSelectTags }: TagListProps) => {
+  const [tags, setTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
-    const toggleTag = (tag: string) => {
-        const updatedTags = selectedTags.includes(tag)
-            ? selectedTags.filter(t => t !== tag) // Remove if already selected
-            : [...selectedTags, tag]; // Add if not selected
-
-        setSelectedTags(updatedTags);
-        onSelectTags(updatedTags); // Send selected tags to parent
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const data = await fetchTags();
+        setTags(data.map((tag: { name: string }) => tag.name));
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
     };
+    loadTags();
+  }, []);
 
-    return (
-        <div>
-            <h2>Select Tags</h2>
-            <ul>
-                {tags.map((tag, index) => (
-                    <li key={index} onClick={() => toggleTag(tag)}
-                        style={{
-                            cursor: "pointer",
-                            fontWeight: selectedTags.includes(tag) ? "bold" : "normal"
-                        }}>
-                        {tag} {selectedTags.includes(tag) ? "✅" : ""}
-                    </li>
-                ))}
-            </ul>
-            <h3>Selected Tags:</h3>
-            <p>{selectedTags.length > 0 ? selectedTags.join(", ") : "None selected"}</p>
-        </div>
-    );
+  const toggleTag = (tag: string) => {
+    const updatedTags = selectedTags.includes(tag)
+      ? selectedTags.filter((t) => t !== tag)
+      : [...selectedTags, tag];
+
+    setSelectedTags(updatedTags);
+    onSelectTags(updatedTags);
+  };
+
+  return (
+    <div>
+      <h2 className="column-heading">Select Tags</h2>
+      <input
+        type="text"
+        className="search-bar"
+        placeholder="Search Tags..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      <ul>
+        {tags
+          .filter((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+          .map((tag, index) => (
+            <li
+              key={index}
+              onClick={() => toggleTag(tag)}
+              className={selectedTags.includes(tag) ? "selected" : ""}
+              style={{ cursor: "pointer", padding: "5px 0" }}
+            >
+              {tag} {selectedTags.includes(tag) ? "✅" : ""}
+            </li>
+          ))}
+      </ul>
+
+      <h3 style={{ marginTop: "1rem" }}>Selected Tags:</h3>
+      <p>{selectedTags.length > 0 ? selectedTags.join(", ") : "None selected"}</p>
+    </div>
+  );
 };
 
 export default TagList;

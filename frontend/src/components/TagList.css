@@ -1,0 +1,50 @@
+/* TagList.css */
+
+/* Container for the entire tag list section */
+.tag-list-container {
+    margin: 20px 0;
+  }
+  
+  /* Heading for the tags */
+  .tag-list-heading {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  /* Unordered list for tags */
+  .tag-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Individual list items */
+  .tag-list li {
+    padding: 8px 0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  /* Hover effect */
+  .tag-list li:hover {
+    background-color: #f2f2f2;
+  }
+  
+  /* Class to indicate a selected tag */
+  .tag-list li.selected {
+    font-weight: bold;
+    color: #007BFF;
+  }
+  
+  /* Selected tags display */
+  .selected-tags-title {
+    margin-top: 20px;
+    font-weight: bold;
+  }
+  
+  .selected-tags-text {
+    font-style: italic;
+    margin-top: 5px;
+  }
+  

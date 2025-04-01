@@ -1,0 +1,122 @@
+/* MealPlanner.css */
+
+.meal-planner-page {
+    margin: 20px;
+    font-family: sans-serif;
+  }
+  
+  /* Top-level heading */
+  .meal-planner-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Container for two columns */
+  .meal-planner-container {
+    display: flex;
+    flex-wrap: wrap; /* Stacks columns on smaller screens */
+    gap: 2rem;       /* Space between columns */
+    align-items: stretch; /* Force columns to stretch equally */
+  }
+  
+  /* Left and right columns */
+  .meal-planner-column {
+    flex: 1;               /* Equal width columns */
+    min-width: 300px;      /* Prevent columns from getting too narrow */
+    background-color: #fafafa;
+    border-radius: 8px;
+    padding: 1rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;  /* Stack column content vertically */
+    min-height: 650px;       /* Set column height to 650px */
+  }
+  
+  /* Column headings */
+  .column-heading {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Search bar styling */
+  .search-bar {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #000;
+  }
+  
+  /* List styling for ingredients and tags */
+  .meal-planner-column ul {
+    list-style: none;
+    padding-left: 0;
+    /* Set max-height for a taller list */
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  
+  /* Scrollbar styling for webkit browsers */
+  .meal-planner-column ul::-webkit-scrollbar {
+    width: 8px;
+    background-color: #f2f2f2;
+  }
+  
+  .meal-planner-column ul::-webkit-scrollbar-thumb {
+    background-color: #999;
+    border-radius: 4px;
+  }
+  
+  /* Firefox scrollbar styling */
+  .meal-planner-column ul {
+    scrollbar-width: thin;
+    scrollbar-color: #999 #f2f2f2;
+  }
+  
+  /* Bottom output section */
+  .meal-output-section {
+    margin-top: 2rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+  
+  .meal-output-heading {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .meal-output-paragraph {
+    margin-bottom: 1rem;
+  }
+  
+  /* Button styling */
+  .find-meals-button {
+    margin-top: 1rem;
+    padding: 10px 16px;
+    background-color: #007BFF;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .find-meals-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .find-meals-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* Highlight for selected items */
+  .selected {
+    font-weight: bold;
+    color: #007BFF;
+  }
+  
