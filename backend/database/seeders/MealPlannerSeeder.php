@@ -9,7 +9,7 @@ class MealPlannerSeeder extends Seeder
 {
     public function run()
     {
-        // Insert Ingredients
+        // Insert Ingredients (Total: 45)
         DB::table('ingredients')->insert([
             ['name' => 'Chicken'],
             ['name' => 'Rice'],
@@ -21,7 +21,7 @@ class MealPlannerSeeder extends Seeder
             ['name' => 'Beef'],
             ['name' => 'Garlic'],
             ['name' => 'Olive Oil'],
-            // Additional ingredients:
+            // Next 15 ingredients (making 25 total so far)
             ['name' => 'Onion'],
             ['name' => 'Potato'],
             ['name' => 'Carrot'],
@@ -36,7 +36,28 @@ class MealPlannerSeeder extends Seeder
             ['name' => 'Lentils'],
             ['name' => 'Tofu'],
             ['name' => 'Butter'],
-            ['name' => 'Yogurt']
+            ['name' => 'Yogurt'],
+            // Additional 20 ingredients to reach 45 total:
+            ['name' => 'Broccoli'],
+            ['name' => 'Cauliflower'],
+            ['name' => 'Zucchini'],
+            ['name' => 'Eggplant'],
+            ['name' => 'Cucumber'],
+            ['name' => 'Corn'],
+            ['name' => 'Peas'],
+            ['name' => 'Quinoa'],
+            ['name' => 'Oats'],
+            ['name' => 'Barley'],
+            ['name' => 'Sweet Potato'],
+            ['name' => 'Kale'],
+            ['name' => 'Snap Peas'],
+            ['name' => 'Cabbage'],
+            ['name' => 'Parsley'],
+            ['name' => 'Basil'],
+            ['name' => 'Cilantro'],
+            ['name' => 'Lemon'],
+            ['name' => 'Lime'],
+            ['name' => 'Ginger']
         ]);
 
         // Insert Tags
@@ -49,7 +70,6 @@ class MealPlannerSeeder extends Seeder
             ['name' => 'Gluten-Free'],
             ['name' => 'Quick & Easy'],
             ['name' => 'Budget-Friendly'],
-            // Additional Tags:
             ['name' => 'Low Carb'],
             ['name' => 'High Protein'],
             ['name' => 'Dairy-Free'],
