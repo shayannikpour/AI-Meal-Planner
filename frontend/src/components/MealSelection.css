@@ -150,6 +150,22 @@
   margin-bottom: 1rem;
 }
 
+.error-container {
+  margin: 2rem auto;
+  padding: 1rem;
+  background-color: #fff3f3;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  max-width: 600px;
+  text-align: center;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

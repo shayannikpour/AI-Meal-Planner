@@ -34,7 +34,7 @@ class MealPlannerController extends Controller
         // AI Prompt
         $prompt = "Generate a meal using these ingredients: " . implode(", ", $ingredients) .
             ". Consider these dietary preferences: " . implode(", ", $tags) . "." .
-            " Return the meal name, a list of ingredients, and step-by-step instructions.";
+            " Return the meal name, a list of ingredients, and step-by-step instructions. Make sure the language of the output is same as the language of this word " . implode(", ", $ingredients);
 
         // API Configuration
         $apiUrl = env('PHI3_API_URL');
@@ -92,7 +92,11 @@ class MealPlannerController extends Controller
             return response()->json(['error' => 'No meal selected.'], 400);
         }
 
-        $prompt = "Give me the ingredients and step-by-step instructions for $meal.";
+        // Format the meal name by converting from snake_case to Title Case
+        $formattedMeal = str_replace('_', ' ', $meal);
+        $formattedMeal = ucwords($formattedMeal);
+
+        $prompt = "Give me the ingredients and step-by-step instructions for $formattedMeal.";
 
         return $this->askAI($prompt);
     }

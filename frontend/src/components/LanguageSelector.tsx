@@ -9,10 +9,10 @@ interface Language {
 }
 
 const languages: Language[] = [
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' },
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'zh', name: '中文', flag: '🇨🇳' },
+    { code: 'en', name: 'English', flag: 'https://flagcdn.com/w20/gb.png' },
+    { code: 'es', name: 'Español', flag: 'https://flagcdn.com/w20/es.png' },
+    { code: 'fr', name: 'Français', flag: 'https://flagcdn.com/w20/fr.png' },
+    { code: 'zh', name: '中文', flag: 'https://flagcdn.com/w20/cn.png' },
 ];
 
 const LanguageSelector: React.FC = () => {
@@ -32,7 +32,11 @@ const LanguageSelector: React.FC = () => {
                 className="language-button"
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <span className="language-flag">{currentLanguage.flag}</span>
+                <img 
+                    src={currentLanguage.flag} 
+                    alt={`${currentLanguage.name} flag`}
+                    className="language-flag"
+                />
                 <span className="language-name">{currentLanguage.name}</span>
             </button>
 
@@ -44,7 +48,11 @@ const LanguageSelector: React.FC = () => {
                             className={`language-option ${lang.code === language ? 'active' : ''}`}
                             onClick={() => handleLanguageSelect(lang.code)}
                         >
-                            <span className="language-flag">{lang.flag}</span>
+                            <img 
+                                src={lang.flag} 
+                                alt={`${lang.name} flag`}
+                                className="language-flag"
+                            />
                             <span className="language-name">{lang.name}</span>
                         </button>
                     ))}

@@ -1,4 +1,4 @@
-import { useState, useMemo, useContext } from "react";
+import { useState, useMemo, useContext, useEffect } from "react";
 import axios from "axios";
 import { LanguageContext } from '../App';
 import "./MealSelection.css";
@@ -12,86 +12,151 @@ const MealSelection = () => {
     const [loading, setLoading] = useState(false);
     const [refiningLoading, setRefiningLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    const { t } = useContext(LanguageContext);
+    const [error, setError] = useState<string | null>(null);
+    const { t, language } = useContext(LanguageContext);
+
+    // Add useEffect to debug mealResponse changes
+    useEffect(() => {
+        console.log('mealResponse changed:', mealResponse);
+    }, [mealResponse]);
 
     // Upper row of recipes (scrolls right to left)
     const upperRecipes = [
-        "Spaghetti Carbonara", "Grilled Chicken with Rice", "Vegetable Stir-Fry", "Salmon with Lemon Butter", "Beef Tacos",
-        "Mushroom Risotto", "Thai Green Curry", "Margherita Pizza", "Beef Stroganoff", "Greek Salad",
-        "Butter Chicken", "Stuffed Bell Peppers", "Tuna Casserole", "Eggplant Parmesan", "Chicken Fajitas",
-        "Pulled Pork Sandwiches", "Gnocchi with Pesto", "Spinach and Ricotta Cannelloni", "Baked Ziti", "Korean Bibimbap",
-        "Bangers and Mash", "Jambalaya", "Moroccan Tagine", "Fish and Chips", "Baked Mac and Cheese",
-        "Chili Con Carne", "Ratatouille", "Bulgogi Beef", "Quiche Lorraine", "Pho",
-        "Paella", "Sweet and Sour Chicken", "Pork Schnitzel", "Fettuccine Alfredo",
-        "Tandoori Chicken", "Zucchini Noodles with Marinara", "Lentil Soup", "Shepherd's Pie", "Falafel Wraps",
-        "Ceviche", "Steak Frites", "Chicken Katsu Curry", "Nasi Goreng", "Gyoza Dumplings",
-        "Risotto alla Milanese", "Beef Wellington", "Chicken Parmesan", "Croque Monsieur", "Roast Duck with Orange Sauce",
-        "Coconut Chicken Curry", "Moussaka", "Shrimp Tacos", "Avocado Toast", "Kimchi Fried Rice",
-        "Lasagna", "Japanese Curry", "Calamari", "Chicken Shawarma", "Pork Ramen",
-        "Steamed Dumplings", "Vietnamese Banh Mi", "Beef Enchiladas", "Bruschetta", "Chicken Cacciatore",
-        "Pulled Jackfruit Tacos", "Tortellini Alfredo", "Ginger Chicken Stir Fry", "Barbacoa Beef", "Steak Quesadilla",
-        "Sushi Rolls", "Okonomiyaki", "Mapo Tofu", "Shakshuka", "Halloumi Burgers",
-        "Chicken Caesar Wraps", "Turkey Meatballs", "Pasta Primavera", "Tofu Pad See Ew", "Arroz con Pollo",
-        "Crab Cakes", "Gumbo", "Biryani", "Beef Bulgogi Bowls", "Hoisin Duck Wraps",
-        "Spinach Pie", "Chicken Pot Pie", "Baked Falafel", "Prawn Linguine", "Char Siu Pork",
-        "Caprese Salad", "Cottage Pie", "Stuffed Cabbage Rolls", "Tempura Udon", "Ham and Cheese Croquettes",
-        "French Onion Soup", "Soba Noodle Bowl", "Grilled Sea Bass", "Peking Duck", "Seafood Paella",
-        "Polenta with Mushrooms", "Beetroot Salad", "Chicken Tagine", "Vegetarian Chili", "Stuffed Mushrooms"
+        t('meals_spaghettiCarbonara'), t('meals_grilledChickenRice'), t('meals_vegetableStirFry'), 
+        t('meals_salmonLemonButter'), t('meals_beefTacos'),
+        t('meals_mushroomRisotto'), t('meals_thaiGreenCurry'), t('meals_margheritaPizza'), 
+        t('meals_beefStroganoff'), t('meals_greekSalad'),
+        t('meals_butterChicken'), t('meals_stuffedBellPeppers'), t('meals_tunaCasserole'), 
+        t('meals_eggplantParmesan'), t('meals_chickenFajitas'),
+        t('meals_pulledPorkSandwiches'), t('meals_gnocchiPesto'), t('meals_spinachRicottaCannelloni'), 
+        t('meals_bakedZiti'), t('meals_koreanBibimbap'),
+        t('meals_bangersAndMash'), t('meals_jambalaya'), t('meals_moroccanTagine'), 
+        t('meals_fishAndChips'), t('meals_bakedMacAndCheese'),
+        t('meals_chiliConCarne'), t('meals_ratatouille'), t('meals_bulgogiBeef'), 
+        t('meals_quicheLorraine'), t('meals_pho'),
+        t('meals_paella'), t('meals_sweetAndSourChicken'), t('meals_porkSchnitzel'), 
+        t('meals_fettuccineAlfredo'),
+        t('meals_tandooriChicken'), t('meals_zucchiniNoodlesMarinara'), t('meals_lentilSoup'), 
+        t('meals_shepherdsPie'), t('meals_falafelWraps'),
+        t('meals_ceviche'), t('meals_steakFrites'), t('meals_chickenKatsuCurry'), 
+        t('meals_nasiGoreng'), t('meals_gyozaDumplings'),
+        t('meals_risottoMilanese'), t('meals_beefWellington'), t('meals_chickenParmesan'), 
+        t('meals_croqueMonsieur'), t('meals_roastDuckOrangeSauce'),
+        t('meals_coconutChickenCurry'), t('meals_moussaka'), t('meals_shrimpTacos'), 
+        t('meals_avocadoToast'), t('meals_kimchiFriedRice'),
+        t('meals_lasagna'), t('meals_japaneseCurry'), t('meals_calamari'), 
+        t('meals_chickenShawarma'), t('meals_porkRamen'),
+        t('meals_steamedDumplings'), t('meals_vietnameseBanhMi'), t('meals_beefEnchiladas'), 
+        t('meals_bruschetta'), t('meals_chickenCacciatore'),
+        t('meals_pulledJackfruitTacos'), t('meals_tortelliniAlfredo'), t('meals_gingerChickenStirFry'), 
+        t('meals_barbacoaBeef'), t('meals_steakQuesadilla'),
+        t('meals_sushiRolls'), t('meals_okonomiyaki'), t('meals_mapoTofu'), 
+        t('meals_shakshuka'), t('meals_halloumiBurgers'),
+        t('meals_chickenCaesarWraps'), t('meals_turkeyMeatballs'), t('meals_pastaPrimavera'), 
+        t('meals_tofuPadSeeEw'), t('meals_arrozConPollo'),
+        t('meals_crabCakes'), t('meals_gumbo'), t('meals_biryani'), 
+        t('meals_beefBulgogiBowls'), t('meals_hoisinDuckWraps'),
+        t('meals_spinachPie'), t('meals_chickenPotPie'), t('meals_bakedFalafel'), 
+        t('meals_prawnLinguine'), t('meals_charSiuPork'),
+        t('meals_capreseSalad'), t('meals_cottagePie'), t('meals_stuffedCabbageRolls'), 
+        t('meals_tempuraUdon'), t('meals_hamAndCheeseCroquettes'),
+        t('meals_frenchOnionSoup'), t('meals_sobaNoodleBowl'), t('meals_grilledSeaBass'), 
+        t('meals_pekingDuck'), t('meals_seafoodPaella'),
+        t('meals_polentaMushrooms'), t('meals_beetrootSalad'), t('meals_chickenTagine'), 
+        t('meals_vegetarianChili'), t('meals_stuffedMushrooms')
     ];
-    
 
+    // Middle row of recipes
     const middleRecipes = [
-        "Chicken Alfredo", "Tofu Stir-Fry", "Beef and Broccoli", "Tuna Salad", "BBQ Chicken Pizza",
-        "Egg Fried Rice", "Baked Potatoes with Cheese", "Chickpea Curry", "Meatball Subs", "Shredded Chicken Enchiladas",
-        "Pasta Bolognese", "Salmon Teriyaki", "Crispy Tofu Tacos", "Eggplant Stir Fry", "Stuffed Sweet Potatoes",
-        "Veggie Burrito Bowl", "Shrimp Fried Rice", "Zoodle Stir-Fry", "Chicken Pesto Wrap", "Bacon and Egg Sandwich",
-        "Garlic Butter Shrimp", "French Toast", "Huevos Rancheros", "Sweet Potato Curry", "Spinach Ravioli",
-        "Tom Yum Soup", "Spicy Chicken Ramen", "Kimchi Stew", "Stuffed Zucchini Boats", "Turkey Club Sandwich",
-        "Tortilla Española", "Beef Jerky Rice Bowl", "Chili Tofu", "Cucumber Sandwiches", "Japanese Tamagoyaki",
-        "Black Bean Burgers", "Katsu Sando", "Egg Curry", "Fish Tikka", "Bulgur Wheat Salad",
-        "Vegetarian Tacos", "Bacon Mac and Cheese", "Creamy Mushroom Pasta", "Chicken Gyros", "Pita with Hummus",
-        "Cranberry Chicken Salad", "Pineapple Fried Rice", "Mango Chicken Wraps", "Lamb Rogan Josh", "Crab Linguine",
-        "Clam Chowder", "Spinach and Feta Quesadilla", "Potato Leek Soup", "Roast Beef Sandwich", "Avocado Chicken Bowl",
-        "Sourdough Grilled Cheese", "Sriracha Noodles", "Kale Caesar Salad", "Pesto Zoodles", "Chili Mac",
-        "Shrimp Lettuce Wraps", "Chicken Lettuce Wraps", "Burrata Salad", "Panzanella", "Pico de Gallo Chicken",
-        "Salmon Cakes", "Yakisoba", "Pork Belly Buns", "Green Lentil Salad", "Vegan Poke Bowl",
-        "Creamy Cauliflower Soup", "Chicken Noodle Soup", "Broccoli Cheddar Soup", "Shiitake Fried Rice", "Smashed Chickpea Salad",
-        "Vegan Shepherd's Pie", "BBQ Tempeh Wraps", "Orange Chicken", "Pineapple Chicken", "Coconut Shrimp Curry",
-        "Garlic Naan with Chole", "Mexican Rice Bowl", "Buffalo Chicken Sandwich", "Pesto Chicken Pizza", "Steamed Bao Buns",
-        "Thai Basil Chicken", "Cornbread and Chili", "Cheesy Broccoli Bake", "Beef Kofta", "Roasted Cauliflower Tacos",
-        "Mango Avocado Salad", "Lemon Garlic Pasta", "Roasted Vegetable Flatbread", "Chicken Avocado Sandwich", "Egg Salad Sandwich",
-        "Cuban Sandwich", "Shrimp Grits", "Pumpkin Risotto", "Lamb Moussaka", "Italian Sub"
+        t('meals_chickenAlfredo'), t('meals_tofuStirFry'), t('meals_beefAndBroccoli'), 
+        t('meals_tunaSalad'), t('meals_bbqChickenPizza'),
+        t('meals_eggFriedRice'), t('meals_bakedPotatoesCheese'), t('meals_chickpeaCurry'), 
+        t('meals_meatballSubs'), t('meals_shreddedChickenEnchiladas'),
+        t('meals_pastaBolognese'), t('meals_salmonTeriyaki'), t('meals_crispyTofuTacos'), 
+        t('meals_eggplantStirFry'), t('meals_stuffedSweetPotatoes'),
+        t('meals_veggieBurritoBowl'), t('meals_shrimpFriedRice'), t('meals_zoodleStirFry'), 
+        t('meals_chickenPestoWrap'), t('meals_baconAndEggSandwich'),
+        t('meals_garlicButterShrimp'), t('meals_frenchToast'), t('meals_huevosRancheros'), 
+        t('meals_sweetPotatoCurry'), t('meals_spinachRavioli'),
+        t('meals_tomYumSoup'), t('meals_spicyChickenRamen'), t('meals_kimchiStew'), 
+        t('meals_stuffedZucchiniBoats'), t('meals_turkeyClubSandwich'),
+        t('meals_tortillaEspanola'), t('meals_beefJerkyRiceBowl'), t('meals_chiliTofu'), 
+        t('meals_cucumberSandwiches'), t('meals_japaneseTamagoyaki'),
+        t('meals_blackBeanBurgers'), t('meals_katsuSando'), t('meals_eggCurry'), 
+        t('meals_fishTikka'), t('meals_bulgurWheatSalad'),
+        t('meals_vegetarianTacos'), t('meals_baconMacAndCheese'), t('meals_creamyMushroomPasta'), 
+        t('meals_chickenGyros'), t('meals_pitaWithHummus'),
+        t('meals_cranberryChickenSalad'), t('meals_pineappleFriedRice'), t('meals_mangoChickenWraps'), 
+        t('meals_lambRoganJosh'), t('meals_crabLinguine'),
+        t('meals_clamChowder'), t('meals_spinachAndFetaQuesadilla'), t('meals_potatoLeekSoup'), 
+        t('meals_roastBeefSandwich'), t('meals_avocadoChickenBowl'),
+        t('meals_sourdoughGrilledCheese'), t('meals_srirachaNoodles'), t('meals_kaleCaesarSalad'), 
+        t('meals_pestoZoodles'), t('meals_chiliMac'),
+        t('meals_shrimpLettuceWraps'), t('meals_chickenLettuceWraps'), t('meals_burrataSalad'), 
+        t('meals_panzanella'), t('meals_picoDeGalloChicken'),
+        t('meals_salmonCakes'), t('meals_yakisoba'), t('meals_porkBellyBuns'), 
+        t('meals_greenLentilSalad'), t('meals_veganPokeBowl'),
+        t('meals_creamyCauliflowerSoup'), t('meals_chickenNoodleSoup'), t('meals_broccoliCheddarSoup'), 
+        t('meals_shiitakeFriedRice'), t('meals_smashedChickpeaSalad'),
+        t('meals_veganShepherdsPie'), t('meals_bbqTempehWraps'), t('meals_orangeChicken'), 
+        t('meals_pineappleChicken'), t('meals_coconutShrimpCurry'),
+        t('meals_garlicNaanWithChole'), t('meals_mexicanRiceBowl'), t('meals_buffaloChickenSandwich'), 
+        t('meals_pestoChickenPizza'), t('meals_steamedBaoBuns'),
+        t('meals_thaiBasilChicken'), t('meals_cornbreadAndChili'), t('meals_cheesyBroccoliBake'), 
+        t('meals_beefKofta'), t('meals_roastedCauliflowerTacos'),
+        t('meals_mangoAvocadoSalad'), t('meals_lemonGarlicPasta'), t('meals_roastedVegetableFlatbread'), 
+        t('meals_chickenAvocadoSandwich'), t('meals_eggSaladSandwich'),
+        t('meals_cubanSandwich'), t('meals_shrimpGrits'), t('meals_pumpkinRisotto'), 
+        t('meals_lambMoussaka'), t('meals_italianSub')
     ];
-    
 
     // Lower row of recipes (scrolls left to right)
     const lowerRecipes = [
-        "Chicken Tikka Masala", "Pesto Pasta", "Lamb Kebabs", "Shrimp Scampi", "Caesar Salad",
-        "Vegetable Lasagna", "Teriyaki Salmon", "Beef Burgers", "Pad Thai", "Mushroom Wellington",
-        "Hot and Sour Soup", "Baked Eggplant", "Fried Chicken Sandwich", "Veggie Sushi", "Soba Noodles with Veggies",
-        "Miso Ramen", "Ginger Pork", "Sesame Chicken", "Stuffed Tomatoes", "Roasted Beet Salad",
-        "Nicoise Salad", "Beef Curry", "Salmon Avocado Roll", "Tofu Curry", "Bacon Wrapped Dates",
-        "Avocado Egg Salad", "Roasted Turkey Breast", "Spaghetti Aglio e Olio", "Vegan Mac and Cheese", "Sweet Potato Fries",
-        "Brussels Sprouts with Bacon", "Couscous Salad", "Lobster Bisque", "Truffle Pasta", "Ricotta Pancakes",
-        "Blueberry Waffles", "Grilled Shrimp Skewers", "Spaghetti with Meatballs", "French Crepes", "BBQ Ribs",
-        "Kale and Quinoa Salad", "Eggplant Caponata", "Cauliflower Steak", "Sweetcorn Fritters", "Shrimp Tacos with Slaw",
-        "Crab Fried Rice", "Garlic Chicken Thighs", "Lamb Souvlaki", "Tex-Mex Bowl", "Bacon Fried Rice",
-        "Oven-Baked Falafel", "Smoked Salmon Bagel", "Jerk Chicken", "Tomato Basil Soup", "Pineapple Chicken Rice",
-        "Stuffed Portobello Mushrooms", "Chicken Yakisoba", "Ramen with Soft-Boiled Egg", "Moroccan Couscous", "Lemon Dill Chicken",
-        "Chimichurri Steak", "Chicken and Dumplings", "Seared Scallops", "Italian Wedding Soup", "Spinach Artichoke Pasta",
-        "Spicy Tuna Roll", "Mango Salsa Chicken", "Garlic Parmesan Wings", "Broccoli Stir Fry", "Cabbage Rolls",
-        "Shredded Pork Tacos", "Fajita Bowl", "Pumpkin Soup", "Beef and Bean Burritos", "Corn Fritters",
-        "Vietnamese Spring Rolls", "Chicken Pesto Pasta", "Steamed Mussels", "Roasted Chickpeas", "Korean Fried Chicken",
-        "Pork Gyoza", "Mini Quiches", "Thai Larb", "Shrimp Toast", "Avocado Corn Salad",
-        "Veggie Stir Fry Noodles", "Brie and Apple Sandwich", "Savory Crepes", "Duck Confit", "Ghee Roast Chicken",
-        "Paprika Chicken", "Okra and Tomatoes", "Smoked Brisket", "Szechuan Tofu", "Beef Teriyaki",
-        "Pineapple Salsa Fish", "Creamed Spinach", "Tuna Melt", "Artichoke Pizza", "Garlic Roasted Potatoes"
+        t('meals_chickenTikkaMasala'), t('meals_pestoPasta'), t('meals_lambKebabs'), 
+        t('meals_shrimpScampi'), t('meals_caesarSalad'),
+        t('meals_vegetableLasagna'), t('meals_teriyakiSalmon'), t('meals_beefBurgers'), 
+        t('meals_padThai'), t('meals_mushroomWellington'),
+        t('meals_hotAndSourSoup'), t('meals_bakedEggplant'), t('meals_friedChickenSandwich'), 
+        t('meals_veggieSushi'), t('meals_sobaNoodlesWithVeggies'),
+        t('meals_misoRamen'), t('meals_gingerPork'), t('meals_sesameChicken'), 
+        t('meals_stuffedTomatoes'), t('meals_roastedBeetSalad'),
+        t('meals_nicoiseSalad'), t('meals_beefCurry'), t('meals_salmonAvocadoRoll'), 
+        t('meals_tofuCurry'), t('meals_baconWrappedDates'),
+        t('meals_avocadoEggSalad'), t('meals_roastedTurkeyBreast'), t('meals_spaghettiAglioEOlio'), 
+        t('meals_veganMacAndCheese'), t('meals_sweetPotatoFries'),
+        t('meals_brusselsSproutsWithBacon'), t('meals_couscousSalad'), t('meals_lobsterBisque'), 
+        t('meals_trufflePasta'), t('meals_ricottaPancakes'),
+        t('meals_blueberryWaffles'), t('meals_grilledShrimpSkewers'), t('meals_spaghettiWithMeatballs'), 
+        t('meals_frenchCrepes'), t('meals_bbqRibs'),
+        t('meals_kaleAndQuinoaSalad'), t('meals_eggplantCaponata'), t('meals_cauliflowerSteak'), 
+        t('meals_sweetcornFritters'), t('meals_shrimpTacosWithSlaw'),
+        t('meals_crabFriedRice'), t('meals_garlicChickenThighs'), t('meals_lambSouvlaki'), 
+        t('meals_texMexBowl'), t('meals_baconFriedRice'),
+        t('meals_ovenBakedFalafel'), t('meals_smokedSalmonBagel'), t('meals_jerkChicken'), 
+        t('meals_tomatoBasilSoup'), t('meals_pineappleChickenRice'),
+        t('meals_stuffedPortobelloMushrooms'), t('meals_chickenYakisoba'), t('meals_ramenWithSoftBoiledEgg'), 
+        t('meals_moroccanCouscous'), t('meals_lemonDillChicken'),
+        t('meals_chimichurriSteak'), t('meals_chickenAndDumplings'), t('meals_searedScallops'), 
+        t('meals_italianWeddingSoup'), t('meals_spinachArtichokePasta'),
+        t('meals_spicyTunaRoll'), t('meals_mangoSalsaChicken'), t('meals_garlicParmesanWings'), 
+        t('meals_broccoliStirFry'), t('meals_cabbageRolls'),
+        t('meals_shreddedPorkTacos'), t('meals_fajitaBowl'), t('meals_pumpkinSoup'), 
+        t('meals_beefAndBeanBurritos'), t('meals_cornFritters'),
+        t('meals_vietnameseSpringRolls'), t('meals_chickenPestoPasta'), t('meals_steamedMussels'), 
+        t('meals_roastedChickpeas'), t('meals_koreanFriedChicken'),
+        t('meals_porkGyoza'), t('meals_miniQuiches'), t('meals_thaiLarb'), 
+        t('meals_shrimpToast'), t('meals_avocadoCornSalad'),
+        t('meals_veggieStirFryNoodles'), t('meals_brieAndAppleSandwich'), t('meals_savoryCrepes'), 
+        t('meals_duckConfit'), t('meals_gheeRoastChicken'),
+        t('meals_paprikaChicken'), t('meals_okraAndTomatoes'), t('meals_smokedBrisket'), 
+        t('meals_szechuanTofu'), t('meals_beefTeriyaki'),
+        t('meals_pineappleSalsaFish'), t('meals_creamedSpinach'), t('meals_tunaMelt'), 
+        t('meals_artichokePizza'), t('meals_garlicRoastedPotatoes')
     ];
-    
 
     // Memoize the filtered recipes to prevent unnecessary recalculations
     const { filteredUpperRecipes, filteredMiddleRecipes, filteredLowerRecipes } = useMemo(() => {
-        const allRecipes = [...upperRecipes, ...lowerRecipes];
+        const allRecipes = [...upperRecipes, ...middleRecipes, ...lowerRecipes].filter(recipe => recipe && typeof recipe === 'string');
         const filteredRecipes = allRecipes.filter(recipe => 
             recipe.toLowerCase().includes(searchQuery.toLowerCase())
         );
@@ -104,18 +169,43 @@ const MealSelection = () => {
             filteredMiddleRecipes: duplicatedFilteredRecipes.filter((_, index) => index % 35 === 0),
             filteredLowerRecipes: duplicatedFilteredRecipes.filter((_, index) => index % 35 === 1)
         };
-    }, [searchQuery, upperRecipes, middleRecipes, lowerRecipes]);
+    }, [searchQuery, upperRecipes, middleRecipes, lowerRecipes, language]);
 
     const fetchMealRecipe = async (mealName: string) => {
         setLoading(true);
         setSelectedMeal(mealName);
         setMealResponse(null);
+        setError(null);
 
         try {
-            const response = await axios.post(`${API_BASE_URL}/get-recipe`, { meal: mealName });
+            // Get the original meal name by removing the 'meals_' prefix
+            const originalMealName = mealName.replace('meals_', '');
+            console.log('Sending meal name to API:', originalMealName);
+            
+            const response = await axios.post(`${API_BASE_URL}/get-recipe`, { meal: originalMealName });
+            console.log('API Response:', response.data);
+            
+            // Log the state before update
+            console.log('Current mealResponse state:', mealResponse);
+            
             setMealResponse(response.data);
+            
+            // Log after state update (will show in next render)
+            console.log('Updated mealResponse state:', response.data);
         } catch (error) {
             console.error("Error fetching meal recipe:", error);
+            if (axios.isAxiosError(error)) {
+                console.error("Error details:", error.response?.data);
+                
+                // Check if it's a rate limit error
+                if (error.response?.data?.details?.includes('UserByModelByDay')) {
+                    setError(t('aiRateLimitError') || 'The AI service is currently busy. Please try again in a few minutes.');
+                } else {
+                    setError(t('errorFetchingRecipe') || 'Error fetching recipe. Please try again.');
+                }
+            } else {
+                setError(t('errorFetchingRecipe') || 'Error fetching recipe. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -208,17 +298,27 @@ const MealSelection = () => {
                 </div>
             )}
 
+            {error && (
+                <div className="error-container">
+                    <p className="error-message">{error}</p>
+                </div>
+            )}
+
             {mealResponse && (
-                <div className="recipe-details">
+                <div className="recipe-details" style={{ display: 'block' }}>
                     <h3 className="recipe-title">{mealResponse.meal}</h3>
                     
                     <div className="recipe-content">
                         <div className="ingredients-section">
                             <h4>{t('ingredients')}</h4>
                             <ul className="ingredients-list">
-                                {mealResponse.ingredients?.map((ingredient, index) => (
-                                    <li key={index}>{ingredient}</li>
-                                )) || <li>{t('noIngredients')}</li>}
+                                {Array.isArray(mealResponse.ingredients) ? (
+                                    mealResponse.ingredients.map((ingredient, index) => (
+                                        <li key={index}>{ingredient}</li>
+                                    ))
+                                ) : (
+                                    <li>{t('noIngredients')}</li>
+                                )}
                             </ul>
                         </div>
                         
@@ -250,21 +350,11 @@ const MealSelection = () => {
                                     {t('askAI')}
                                 </button>
                             ) : (
-                                <div className="refinement-loading-button">
-                                    <div className="refinement-loading-dots">
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
-                                    </div>
-                                    <span>{t('aiThinking')}</span>
-                                </div>
+                                <button className="refinement-button" disabled>
+                                    {t('aiThinking')}
+                                </button>
                             )}
                         </div>
-                        {refiningLoading && (
-                            <div className="refinement-loading-message">
-                                {t('customizingRecipe')}
-                            </div>
-                        )}
                     </div>
                 </div>
             )}

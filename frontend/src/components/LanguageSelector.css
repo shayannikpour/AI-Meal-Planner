@@ -57,7 +57,10 @@
 }
 
 .language-flag {
-    font-size: 1.2rem;
+    width: 24px;
+    height: 16px;
+    object-fit: cover;
+    border-radius: 2px;
 }
 
 .language-name {
@@ -82,4 +85,4 @@
     .language-dropdown {
         width: 150px;
     }
-} 
+}
