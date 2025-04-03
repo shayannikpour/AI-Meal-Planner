@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { fetchIngredients } from "../api";
 import "./IngredientSelector.css";
 
 const API_BASE_URL = "http://localhost:8000/api";
@@ -14,6 +13,50 @@ const DIETARY_TAGS = [
     "Gluten-Free",
     "Quick & Easy",
     "Budget-Friendly"
+];
+
+const INGREDIENTS_LIST = [
+    // Vegetables
+    "Tomatoes", "Onions", "Garlic", "Bell Peppers", "Carrots", "Broccoli", "Spinach", 
+    "Lettuce", "Mushrooms", "Zucchini", "Eggplant", "Cucumber", "Celery", "Asparagus",
+    "Sweet Potatoes", "Potatoes", "Corn", "Green Beans", "Peas", "Cauliflower",
+    "Cabbage", "Brussels Sprouts", "Kale", "Arugula", "Radishes", "Beets",
+    "Butternut Squash", "Pumpkin", "Artichokes", "Leeks",
+
+    // Fruits
+    "Apples", "Bananas", "Oranges", "Lemons", "Limes", "Strawberries", "Blueberries",
+    "Raspberries", "Blackberries", "Grapes", "Pineapple", "Mango", "Peaches", "Pears",
+    "Plums", "Cherries", "Avocado", "Coconut", "Pomegranate", "Kiwi",
+
+    // Proteins
+    "Chicken Breast", "Ground Beef", "Salmon", "Tuna", "Shrimp", "Tofu", "Eggs",
+    "Turkey", "Pork Chops", "Lamb", "Ground Turkey", "Bacon", "Ham", "Sausage",
+    "Cod", "Tilapia", "Halibut", "Crab", "Lobster", "Scallops",
+
+    // Dairy & Alternatives
+    "Milk", "Cheese", "Yogurt", "Butter", "Heavy Cream", "Sour Cream", "Cream Cheese",
+    "Mozzarella", "Parmesan", "Cheddar", "Almond Milk", "Soy Milk", "Oat Milk",
+    "Coconut Milk", "Greek Yogurt", "Cottage Cheese", "Ricotta", "Feta",
+
+    // Grains & Pasta
+    "Rice", "Quinoa", "Pasta", "Bread", "Flour", "Oats", "Couscous", "Barley",
+    "Tortillas", "Breadcrumbs", "Spaghetti", "Penne", "Fettuccine", "Brown Rice",
+    "Wild Rice", "Bulgur", "Ramen Noodles", "Rice Noodles",
+
+    // Herbs & Spices
+    "Basil", "Oregano", "Thyme", "Rosemary", "Cilantro", "Parsley", "Mint",
+    "Cumin", "Paprika", "Cinnamon", "Nutmeg", "Ginger", "Turmeric", "Coriander",
+    "Bay Leaves", "Sage", "Dill", "Chives",
+
+    // Nuts & Seeds
+    "Almonds", "Walnuts", "Pecans", "Cashews", "Peanuts", "Pistachios",
+    "Sunflower Seeds", "Pumpkin Seeds", "Chia Seeds", "Flax Seeds", "Pine Nuts",
+    "Sesame Seeds", "Macadamia Nuts",
+
+    // Pantry Items
+    "Olive Oil", "Vegetable Oil", "Soy Sauce", "Vinegar", "Honey", "Maple Syrup",
+    "Sugar", "Brown Sugar", "Salt", "Black Pepper", "Tomato Sauce", "Mustard",
+    "Mayonnaise", "Ketchup", "Hot Sauce", "Worcestershire Sauce"
 ];
 
 interface MealResponse {
@@ -31,24 +74,11 @@ interface MealResponse {
 }
 
 const IngredientSelector: React.FC = () => {
-    const [ingredients, setIngredients] = useState<string[]>([]);
     const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [mealResponse, setMealResponse] = useState<MealResponse | null>(null);
     const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        const loadIngredients = async () => {
-            try {
-                const data = await fetchIngredients();
-                setIngredients(data.map((ing: { name: string }) => ing.name));
-            } catch (error) {
-                console.error("Error fetching ingredients:", error);
-            }
-        };
-        loadIngredients();
-    }, []);
 
     const toggleIngredient = (ingredient: string) => {
         setSelectedIngredients((prev) =>
@@ -85,6 +115,10 @@ const IngredientSelector: React.FC = () => {
         }
     };
 
+    const filteredIngredients = INGREDIENTS_LIST.filter(ingredient =>
+        ingredient.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="ingredient-selector-container">
             <div className="ingredient-selector-header">
@@ -104,23 +138,83 @@ const IngredientSelector: React.FC = () => {
 
             <div className="ingredients-carousel-container">
                 <div className="ingredients-carousel">
-                    <div className="carousel-inner">
-                        {[...ingredients, ...ingredients]
-                            .filter((ingredient) =>
-                                ingredient.toLowerCase().includes(searchTerm.toLowerCase())
-                            )
-                            .map((ingredient, idx) => {
-                                const isSelected = selectedIngredients.includes(ingredient);
-                                return (
-                                    <button
-                                        key={`ingredient-${idx}`}
-                                        onClick={() => toggleIngredient(ingredient)}
-                                        className={`ingredient-btn ${isSelected ? 'active' : ''}`}
-                                    >
-                                        {ingredient}
-                                    </button>
-                                );
-                            })}
+                    <div className="carousel-row">
+                        {filteredIngredients.slice(0, Math.floor(filteredIngredients.length / 3)).map((ingredient, idx) => {
+                            const isSelected = selectedIngredients.includes(ingredient);
+                            return (
+                                <button
+                                    key={`ingredient-1-${idx}`}
+                                    onClick={() => toggleIngredient(ingredient)}
+                                    className={`ingredient-btn ${isSelected ? 'active' : ''}`}
+                                >
+                                    {ingredient}
+                                </button>
+                            );
+                        })}
+                        {filteredIngredients.slice(0, Math.floor(filteredIngredients.length / 3)).map((ingredient, idx) => {
+                            const isSelected = selectedIngredients.includes(ingredient);
+                            return (
+                                <button
+                                    key={`ingredient-1-repeat-${idx}`}
+                                    onClick={() => toggleIngredient(ingredient)}
+                                    className={`ingredient-btn ${isSelected ? 'active' : ''}`}
+                                >
+                                    {ingredient}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <div className="carousel-row reverse">
+                        {filteredIngredients.slice(Math.floor(filteredIngredients.length / 3), Math.floor(2 * filteredIngredients.length / 3)).map((ingredient, idx) => {
+                            const isSelected = selectedIngredients.includes(ingredient);
+                            return (
+                                <button
+                                    key={`ingredient-2-${idx}`}
+                                    onClick={() => toggleIngredient(ingredient)}
+                                    className={`ingredient-btn ${isSelected ? 'active' : ''}`}
+                                >
+                                    {ingredient}
+                                </button>
+                            );
+                        })}
+                        {filteredIngredients.slice(Math.floor(filteredIngredients.length / 3), Math.floor(2 * filteredIngredients.length / 3)).map((ingredient, idx) => {
+                            const isSelected = selectedIngredients.includes(ingredient);
+                            return (
+                                <button
+                                    key={`ingredient-2-repeat-${idx}`}
+                                    onClick={() => toggleIngredient(ingredient)}
+                                    className={`ingredient-btn ${isSelected ? 'active' : ''}`}
+                                >
+                                    {ingredient}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <div className="carousel-row">
+                        {filteredIngredients.slice(Math.floor(2 * filteredIngredients.length / 3)).map((ingredient, idx) => {
+                            const isSelected = selectedIngredients.includes(ingredient);
+                            return (
+                                <button
+                                    key={`ingredient-3-${idx}`}
+                                    onClick={() => toggleIngredient(ingredient)}
+                                    className={`ingredient-btn ${isSelected ? 'active' : ''}`}
+                                >
+                                    {ingredient}
+                                </button>
+                            );
+                        })}
+                        {filteredIngredients.slice(Math.floor(2 * filteredIngredients.length / 3)).map((ingredient, idx) => {
+                            const isSelected = selectedIngredients.includes(ingredient);
+                            return (
+                                <button
+                                    key={`ingredient-3-repeat-${idx}`}
+                                    onClick={() => toggleIngredient(ingredient)}
+                                    className={`ingredient-btn ${isSelected ? 'active' : ''}`}
+                                >
+                                    {ingredient}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
@@ -179,79 +273,26 @@ const IngredientSelector: React.FC = () => {
             )}
 
             {mealResponse && (
-                <div className="recipe-details">
-                    <div className="recipe-header">
-                        <h3 className="recipe-title">{mealResponse.meal}</h3>
-                        <div className="recipe-meta">
-                            {mealResponse.cookingTime && (
-                                <span className="meta-item">
-                                    <i className="fas fa-clock"></i> {mealResponse.cookingTime}
-                                </span>
-                            )}
-                            {mealResponse.difficulty && (
-                                <span className="meta-item">
-                                    <i className="fas fa-signal"></i> {mealResponse.difficulty}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
+                <div className="recipe-container">
+                    <h1 className="recipe-title">{mealResponse.meal}</h1>
+                    
                     <div className="recipe-content">
-                        <div className="ingredients-section">
-                            <h4>Ingredients</h4>
-                            <div className="ingredients-grid">
-                                {mealResponse.ingredients.map((item: string, idx: number) => (
-                                    <div key={idx} className="ingredient-item">
-                                        <span className="ingredient-name">{item}</span>
-                                    </div>
+                        <div className="recipe-section">
+                            <h2>Ingredients</h2>
+                            <ul className="ingredients-list">
+                                {mealResponse.ingredients.map((ingredient: string, idx: number) => (
+                                    <li key={idx}>{ingredient}</li>
                                 ))}
-                            </div>
+                            </ul>
                         </div>
                         
-                        <div className="instructions-section">
-                            <h4>Instructions</h4>
-                            <div className="instructions-list">
-                                {mealResponse.instructions.split('\n').map((step, idx) => (
-                                    <div key={idx} className="instruction-item">
-                                        <span className="step-number">{idx + 1}</span>
-                                        <p className="step-text">{step}</p>
-                                    </div>
-                                ))}
+                        <div className="recipe-section">
+                            <h2>Instructions</h2>
+                            <div className="instructions-text">
+                                {mealResponse.instructions}
                             </div>
                         </div>
                     </div>
-
-                    {mealResponse.nutritionalInfo && (
-                        <div className="nutritional-info">
-                            <h4>Nutritional Information</h4>
-                            <div className="nutrition-grid">
-                                {mealResponse.nutritionalInfo.calories && (
-                                    <div className="nutrition-item">
-                                        <span className="nutrition-value">{mealResponse.nutritionalInfo.calories}</span>
-                                        <span className="nutrition-label">Calories</span>
-                                    </div>
-                                )}
-                                {mealResponse.nutritionalInfo.protein && (
-                                    <div className="nutrition-item">
-                                        <span className="nutrition-value">{mealResponse.nutritionalInfo.protein}g</span>
-                                        <span className="nutrition-label">Protein</span>
-                                    </div>
-                                )}
-                                {mealResponse.nutritionalInfo.carbs && (
-                                    <div className="nutrition-item">
-                                        <span className="nutrition-value">{mealResponse.nutritionalInfo.carbs}g</span>
-                                        <span className="nutrition-label">Carbs</span>
-                                    </div>
-                                )}
-                                {mealResponse.nutritionalInfo.fat && (
-                                    <div className="nutrition-item">
-                                        <span className="nutrition-value">{mealResponse.nutritionalInfo.fat}g</span>
-                                        <span className="nutrition-label">Fat</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
                 </div>
             )}
         </div>
