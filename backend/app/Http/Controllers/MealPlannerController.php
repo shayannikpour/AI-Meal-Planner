@@ -96,7 +96,8 @@ class MealPlannerController extends Controller
         $formattedMeal = str_replace('_', ' ', $meal);
         $formattedMeal = ucwords($formattedMeal);
 
-        $prompt = "Give me the ingredients and step-by-step instructions for $formattedMeal.";
+        //Jask here
+        $prompt = "Give me the ingredients and step-by-step instructions for $formattedMeal. (Make sure the language of the output is same as the language of this word " . $meal . ")";
 
         return $this->askAI($prompt);
     }
@@ -110,7 +111,7 @@ class MealPlannerController extends Controller
             return response()->json(['error' => 'Meal name or issue missing.'], 400);
         }
 
-        $prompt = "I am making $meal, but I have an issue: $issue. How can I adjust the recipe?";
+        $prompt = "I am making $meal, but I have an issue: $issue. How can I adjust the recipe? (Make sure the language of the output is same as the language of this word " . $meal . ")";
 
         return $this->askAI($prompt);
     }
