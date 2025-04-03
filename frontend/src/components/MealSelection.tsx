@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext } from "react";
 import axios from "axios";
+import { LanguageContext } from '../App';
 import "./MealSelection.css";
 
 const API_BASE_URL = "http://localhost:8000/api"; // Laravel API base URL
@@ -11,6 +12,7 @@ const MealSelection = () => {
     const [loading, setLoading] = useState(false);
     const [refiningLoading, setRefiningLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const { t } = useContext(LanguageContext);
 
     // Upper row of recipes (scrolls right to left)
     const upperRecipes = [
@@ -142,12 +144,12 @@ const MealSelection = () => {
     return (
         <div className="meal-selection-container">
             <div className="meal-selection-header">
-                <h2>Choose a Meal</h2>
-                <p className="subtitle">Select from our curated collection of delicious recipes</p>
+                <h2>{t('chooseAMeal')}</h2>
+                <p className="subtitle">{t('popularMeals')}</p>
                 <div className="search-container">
                     <input
                         type="text"
-                        placeholder="Search recipes..."
+                        placeholder={t('searchMeals')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="search-input"
@@ -202,7 +204,7 @@ const MealSelection = () => {
             {loading && (
                 <div className="loading-container">
                     <div className="loading-spinner"></div>
-                    <p>Preparing your recipe...</p>
+                    <p>{t('loading')}</p>
                 </div>
             )}
 
@@ -212,28 +214,28 @@ const MealSelection = () => {
                     
                     <div className="recipe-content">
                         <div className="ingredients-section">
-                            <h4>Ingredients</h4>
+                            <h4>{t('ingredients')}</h4>
                             <ul className="ingredients-list">
                                 {mealResponse.ingredients?.map((ingredient, index) => (
                                     <li key={index}>{ingredient}</li>
-                                )) || <li>No ingredients provided</li>}
+                                )) || <li>{t('noIngredients')}</li>}
                             </ul>
                         </div>
                         
                         <div className="instructions-section">
-                            <h4>Instructions</h4>
+                            <h4>{t('instructions')}</h4>
                             <div className="instructions-text">
-                                {mealResponse.instructions || "No instructions available"}
+                                {mealResponse.instructions || t('noInstructions')}
                             </div>
                         </div>
                     </div>
 
                     <div className="recipe-refinement">
-                        <h4>Need Adjustments?</h4>
+                        <h4>{t('needAdjustments')}</h4>
                         <div className="refinement-input-group">
                             <input
                                 type="text"
-                                placeholder="I don't have rice, what can I use instead?"
+                                placeholder={t('refinementPlaceholder')}
                                 value={userInput}
                                 onChange={(e) => setUserInput(e.target.value)}
                                 className="refinement-input"
@@ -245,7 +247,7 @@ const MealSelection = () => {
                                     disabled={!userInput} 
                                     className="refinement-button"
                                 >
-                                    Ask AI
+                                    {t('askAI')}
                                 </button>
                             ) : (
                                 <div className="refinement-loading-button">
@@ -254,13 +256,13 @@ const MealSelection = () => {
                                         <span></span>
                                         <span></span>
                                     </div>
-                                    <span>AI thinking...</span>
+                                    <span>{t('aiThinking')}</span>
                                 </div>
                             )}
                         </div>
                         {refiningLoading && (
                             <div className="refinement-loading-message">
-                                Customizing recipe based on your request...
+                                {t('customizingRecipe')}
                             </div>
                         )}
                     </div>

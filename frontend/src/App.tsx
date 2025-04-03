@@ -1,81 +1,93 @@
-import React, { useState } from "react";
-import IngredientSelector from "./components/IngredientSelector";
-import MealSelection from "./components/MealSelection";
-import "./App.css";
+import React, { createContext, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LanguageSelector from './components/LanguageSelector';
+import MealSelection from './components/MealSelection';
+import IngredientSelector from './components/IngredientSelector';
+import translations from './translations';
+import './App.css';
 
-const App: React.FC = () => {
-    const [view, setView] = useState<string | null>(null);
+interface LanguageContextType {
+  language: string;
+  setLanguage: (lang: string) => void;
+  t: (key: string) => string;
+}
 
-    return (
+export const LanguageContext = createContext<LanguageContextType>({
+  language: 'en',
+  setLanguage: () => {},
+  t: () => '',
+});
+
+function App() {
+  const [language, setLanguage] = useState('en');
+  const [view, setView] = useState<string | null>(null);
+
+  const t = (key: string): string => {
+    return translations[language][key as keyof typeof translations[typeof language]];
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      <Router>
         <div className="app-container">
-            <header className={`app-header ${!view ? 'home-header' : ''}`}>
-
-                {view && (
-                    <button
-                        onClick={() => setView(null)}
-                        className="back-button"
-                    >
-                        ← Back to Main Menu
-                    </button>
-                )}
-
-                <h1>AI Meal Planner</h1>
-                {view && (
-                    <button
-                        onClick={() => setView(null)}
-                        className="back-button"
-                    >
-                        Favorites
-                    </button>
-                )}
-                
-            </header>
-
-            {/* Show main menu buttons if no view is selected */}
-            {!view && (
-                <div className="main-menu">
-                    <div className="menu-description">
-                        <p>Welcome to AI Meal Planner! Your personal assistant for delicious and healthy meals.</p>
-                    </div>
-                    <div className="menu-options">
-                        <button
-                            onClick={() => setView("mealPlanner")}
-                            className="menu-button planner-button"
-                        >
-                            <span className="button-icon">🥗</span>
-                            <span className="button-text">Start Meal Planning</span>
-                        </button>
-                        <button
-                            onClick={() => setView("mealSelection")}
-                            className="menu-button selection-button"
-                        >
-                            <span className="button-icon">🍽️</span>
-                            <span className="button-text">Choose a Meal</span>
-                        </button>
-                    </div>
-                </div>
+          <LanguageSelector />
+          <header className={`app-header ${!view ? 'home-header' : ''}`}>
+            {view && (
+              <button onClick={() => setView(null)} className="back-button">
+                {t('back')}
+              </button>
             )}
-
-            {/* Show Ingredient Selector */}
-            {view === "mealPlanner" && (
-                <div className="content-container">
-                    <IngredientSelector />
-                </div>
+            <h1>AI Meal Planner</h1>
+            {view && (
+              <button onClick={() => setView(null)} className="back-button">
+                {t('favorites')}
+              </button>
             )}
+          </header>
 
-            {/* Show Meal Selection Page */}
-            {view === "mealSelection" && (
-                <div className="content-container">
-                    <MealSelection />
-                </div>
-            )}
+          {!view && (
+            <div className="main-menu">
+              <div className="menu-description">
+                <p>{t('welcome')}</p>
+              </div>
+              <div className="menu-options">
+                <button
+                  onClick={() => setView("mealPlanner")}
+                  className="menu-button planner-button"
+                >
+                  <span className="button-icon">🥗</span>
+                  <span className="button-text">{t('startMealPlanning')}</span>
+                </button>
+                <button
+                  onClick={() => setView("mealSelection")}
+                  className="menu-button selection-button"
+                >
+                  <span className="button-icon">🍽️</span>
+                  <span className="button-text">{t('chooseAMeal')}</span>
+                </button>
+              </div>
+            </div>
+          )}
 
-            {/* Footer */}
-            <footer className="app-footer">
-                <p>Team Members: Shayan, Mitchell, Eddie, Jaskunwar</p>
-            </footer>
+          {view === "mealPlanner" && (
+            <div className="content-container">
+              <IngredientSelector />
+            </div>
+          )}
+
+          {view === "mealSelection" && (
+            <div className="content-container">
+              <MealSelection />
+            </div>
+          )}
+
+          <footer className="app-footer">
+            <p>{t('teamMembers')}</p>
+          </footer>
         </div>
-    );
-};
+      </Router>
+    </LanguageContext.Provider>
+  );
+}
 
 export default App;

@@ -1,62 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
+import { LanguageContext } from '../App';
 import "./IngredientSelector.css";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
 const DIETARY_TAGS = [
-    "Weight Loss",
-    "Muscle Gain",
-    "Keto-Friendly",
-    "Vegan",
-    "Vegetarian",
-    "Gluten-Free",
-    "Quick & Easy",
-    "Budget-Friendly"
+    "weightLoss",
+    "muscleGain",
+    "ketoFriendly",
+    "vegan",
+    "vegetarian",
+    "glutenFree",
+    "quickEasy",
+    "budgetFriendly"
 ];
 
 const INGREDIENTS_LIST = [
     // Vegetables
-    "Tomatoes", "Onions", "Garlic", "Bell Peppers", "Carrots", "Broccoli", "Spinach", 
-    "Lettuce", "Mushrooms", "Zucchini", "Eggplant", "Cucumber", "Celery", "Asparagus",
-    "Sweet Potatoes", "Potatoes", "Corn", "Green Beans", "Peas", "Cauliflower",
-    "Cabbage", "Brussels Sprouts", "Kale", "Arugula", "Radishes", "Beets",
-    "Butternut Squash", "Pumpkin", "Artichokes", "Leeks",
-
-    // Fruits
-    "Apples", "Bananas", "Oranges", "Lemons", "Limes", "Strawberries", "Blueberries",
-    "Raspberries", "Blackberries", "Grapes", "Pineapple", "Mango", "Peaches", "Pears",
-    "Plums", "Cherries", "Avocado", "Coconut", "Pomegranate", "Kiwi",
-
-    // Proteins
-    "Chicken Breast", "Ground Beef", "Salmon", "Tuna", "Shrimp", "Tofu", "Eggs",
-    "Turkey", "Pork Chops", "Lamb", "Ground Turkey", "Bacon", "Ham", "Sausage",
-    "Cod", "Tilapia", "Halibut", "Crab", "Lobster", "Scallops",
-
-    // Dairy & Alternatives
-    "Milk", "Cheese", "Yogurt", "Butter", "Heavy Cream", "Sour Cream", "Cream Cheese",
-    "Mozzarella", "Parmesan", "Cheddar", "Almond Milk", "Soy Milk", "Oat Milk",
-    "Coconut Milk", "Greek Yogurt", "Cottage Cheese", "Ricotta", "Feta",
-
-    // Grains & Pasta
-    "Rice", "Quinoa", "Pasta", "Bread", "Flour", "Oats", "Couscous", "Barley",
-    "Tortillas", "Breadcrumbs", "Spaghetti", "Penne", "Fettuccine", "Brown Rice",
-    "Wild Rice", "Bulgur", "Ramen Noodles", "Rice Noodles",
-
-    // Herbs & Spices
-    "Basil", "Oregano", "Thyme", "Rosemary", "Cilantro", "Parsley", "Mint",
-    "Cumin", "Paprika", "Cinnamon", "Nutmeg", "Ginger", "Turmeric", "Coriander",
-    "Bay Leaves", "Sage", "Dill", "Chives",
-
-    // Nuts & Seeds
-    "Almonds", "Walnuts", "Pecans", "Cashews", "Peanuts", "Pistachios",
-    "Sunflower Seeds", "Pumpkin Seeds", "Chia Seeds", "Flax Seeds", "Pine Nuts",
-    "Sesame Seeds", "Macadamia Nuts",
-
-    // Pantry Items
-    "Olive Oil", "Vegetable Oil", "Soy Sauce", "Vinegar", "Honey", "Maple Syrup",
-    "Sugar", "Brown Sugar", "Salt", "Black Pepper", "Tomato Sauce", "Mustard",
-    "Mayonnaise", "Ketchup", "Hot Sauce", "Worcestershire Sauce"
+    "ingredients_tomatoes", "ingredients_onions", "ingredients_garlic", "ingredients_bellPeppers", 
+    "ingredients_carrots", "ingredients_broccoli", "ingredients_spinach", "ingredients_lettuce", 
+    "ingredients_mushrooms", "ingredients_zucchini", "ingredients_eggplant", "ingredients_cucumber", 
+    "ingredients_celery", "ingredients_asparagus", "ingredients_sweetPotatoes", "ingredients_potatoes", 
+    "ingredients_corn", "ingredients_greenBeans", "ingredients_peas", "ingredients_cauliflower"
 ];
 
 interface MealResponse {
@@ -79,6 +45,7 @@ const IngredientSelector: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [mealResponse, setMealResponse] = useState<MealResponse | null>(null);
     const [loading, setLoading] = useState(false);
+    const { t } = useContext(LanguageContext);
 
     const toggleIngredient = (ingredient: string) => {
         setSelectedIngredients((prev) =>
@@ -98,14 +65,14 @@ const IngredientSelector: React.FC = () => {
 
     const findMeals = async () => {
         if (selectedIngredients.length === 0) {
-            alert("Please select at least one ingredient.");
+            alert(t('pleaseSelectIngredient'));
             return;
         }
         setLoading(true);
         try {
             const response = await axios.post(`${API_BASE_URL}/generate-meal`, {
-                ingredients: selectedIngredients,
-                tags: selectedTags,
+                ingredients: selectedIngredients.map(ing => t(ing)),
+                tags: selectedTags.map(tag => t(tag)),
             });
             setMealResponse(response.data);
         } catch (error) {
@@ -116,20 +83,20 @@ const IngredientSelector: React.FC = () => {
     };
 
     const filteredIngredients = INGREDIENTS_LIST.filter(ingredient =>
-        ingredient.toLowerCase().includes(searchTerm.toLowerCase())
+        t(ingredient).toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
         <div className="ingredient-selector-container">
             <div className="ingredient-selector-header">
-                <h2>Select Your Ingredients</h2>
-                <p className="subtitle">Choose ingredients you have available to find matching recipes</p>
+                <h2>{t('selectIngredients')}</h2>
+                <p className="subtitle">{t('chooseIngredients')}</p>
             </div>
 
             <div className="search-container">
                 <input
                     type="text"
-                    placeholder="Search ingredients..."
+                    placeholder={t('searchIngredients')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="search-input"
@@ -147,7 +114,7 @@ const IngredientSelector: React.FC = () => {
                                     onClick={() => toggleIngredient(ingredient)}
                                     className={`ingredient-btn ${isSelected ? 'active' : ''}`}
                                 >
-                                    {ingredient}
+                                    {t(ingredient)}
                                 </button>
                             );
                         })}
@@ -159,7 +126,7 @@ const IngredientSelector: React.FC = () => {
                                     onClick={() => toggleIngredient(ingredient)}
                                     className={`ingredient-btn ${isSelected ? 'active' : ''}`}
                                 >
-                                    {ingredient}
+                                    {t(ingredient)}
                                 </button>
                             );
                         })}
@@ -173,7 +140,7 @@ const IngredientSelector: React.FC = () => {
                                     onClick={() => toggleIngredient(ingredient)}
                                     className={`ingredient-btn ${isSelected ? 'active' : ''}`}
                                 >
-                                    {ingredient}
+                                    {t(ingredient)}
                                 </button>
                             );
                         })}
@@ -185,7 +152,7 @@ const IngredientSelector: React.FC = () => {
                                     onClick={() => toggleIngredient(ingredient)}
                                     className={`ingredient-btn ${isSelected ? 'active' : ''}`}
                                 >
-                                    {ingredient}
+                                    {t(ingredient)}
                                 </button>
                             );
                         })}
@@ -199,7 +166,7 @@ const IngredientSelector: React.FC = () => {
                                     onClick={() => toggleIngredient(ingredient)}
                                     className={`ingredient-btn ${isSelected ? 'active' : ''}`}
                                 >
-                                    {ingredient}
+                                    {t(ingredient)}
                                 </button>
                             );
                         })}
@@ -211,7 +178,7 @@ const IngredientSelector: React.FC = () => {
                                     onClick={() => toggleIngredient(ingredient)}
                                     className={`ingredient-btn ${isSelected ? 'active' : ''}`}
                                 >
-                                    {ingredient}
+                                    {t(ingredient)}
                                 </button>
                             );
                         })}
@@ -220,12 +187,12 @@ const IngredientSelector: React.FC = () => {
             </div>
 
             <div className="selected-ingredients-container">
-                <h3>Selected Ingredients</h3>
+                <h3>{t('selectedIngredients')}</h3>
                 <div className="selected-ingredients">
                     {selectedIngredients.length > 0 ? (
                         selectedIngredients.map((ingredient, idx) => (
                             <span key={idx} className="selected-ingredient-tag">
-                                {ingredient}
+                                {t(ingredient)}
                                 <button 
                                     onClick={() => toggleIngredient(ingredient)}
                                     className="remove-ingredient"
@@ -235,13 +202,13 @@ const IngredientSelector: React.FC = () => {
                             </span>
                         ))
                     ) : (
-                        <p className="no-selection">No ingredients selected</p>
+                        <p className="no-selection">{t('noIngredientsSelected')}</p>
                     )}
                 </div>
             </div>
 
             <div className="tags-container">
-                <h3>Dietary Preferences</h3>
+                <h3>{t('dietaryTags')}</h3>
                 <div className="tags-grid">
                     {DIETARY_TAGS.map((tag) => (
                         <button
@@ -249,7 +216,7 @@ const IngredientSelector: React.FC = () => {
                             onClick={() => toggleTag(tag)}
                             className={`tag-btn ${selectedTags.includes(tag) ? 'active' : ''}`}
                         >
-                            {tag}
+                            {t(tag)}
                         </button>
                     ))}
                 </div>
@@ -261,14 +228,14 @@ const IngredientSelector: React.FC = () => {
                     disabled={loading || selectedIngredients.length === 0}
                     className="find-meals-button"
                 >
-                    {loading ? "Finding Meals..." : "Find Meals"}
+                    {loading ? t('generatingMeal') : t('generateMeal')}
                 </button>
             </div>
 
             {loading && (
                 <div className="loading-container">
                     <div className="loading-spinner"></div>
-                    <p>Finding the perfect recipe for you...</p>
+                    <p>{t('findingRecipe')}</p>
                 </div>
             )}
 
@@ -278,7 +245,7 @@ const IngredientSelector: React.FC = () => {
                     
                     <div className="recipe-content">
                         <div className="recipe-section">
-                            <h2>Ingredients</h2>
+                            <h2>{t('ingredients')}</h2>
                             <ul className="ingredients-list">
                                 {mealResponse.ingredients.map((ingredient: string, idx: number) => (
                                     <li key={idx}>{ingredient}</li>
@@ -287,7 +254,7 @@ const IngredientSelector: React.FC = () => {
                         </div>
                         
                         <div className="recipe-section">
-                            <h2>Instructions</h2>
+                            <h2>{t('instructions')}</h2>
                             <div className="instructions-text">
                                 {mealResponse.instructions}
                             </div>
