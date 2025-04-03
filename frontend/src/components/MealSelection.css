@@ -27,29 +27,40 @@
 
 /* Recipe Carousel Styles */
 .recipe-carousel-container {
-  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
   overflow: hidden;
+  position: relative;
 }
 
 .recipe-carousel {
-  position: relative;
-  margin-bottom: 1rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   overflow: hidden;
-  padding: 10px 0;
+  position: relative;
 }
 
 .carousel-inner {
   display: flex;
-  gap: 12px;
+  gap: 15px;
+  padding: 10px 0;
   width: fit-content;
+  margin: 0 auto;
 }
 
 .upper-carousel .carousel-inner {
-  animation: scrollRightToLeft 40s linear infinite;
+  animation: scrollRightToLeft 30s linear infinite;
+}
+
+.middle-carousel .carousel-inner {
+  animation: scrollLeftToRight 30s linear infinite;
 }
 
 .lower-carousel .carousel-inner {
-  animation: scrollLeftToRight 40s linear infinite;
+  animation: scrollRightToLeft 30s linear infinite;
 }
 
 @keyframes scrollRightToLeft {
@@ -345,4 +356,38 @@
     padding: 0.6rem 1rem;
     font-size: 0.9rem;
   }
+}
+
+.search-container {
+  margin: 20px 0;
+  width: 100%;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+.search-input:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+  background-color: #ffffff;
 }
