@@ -9,15 +9,26 @@ const App: React.FC = () => {
     return (
         <div className="app-container">
             <header className={`app-header ${!view ? 'home-header' : ''}`}>
-                <h1>AI Meal Planner</h1>
+
                 {view && (
-                    <button 
-                        onClick={() => setView(null)} 
+                    <button
+                        onClick={() => setView(null)}
                         className="back-button"
                     >
                         ← Back to Main Menu
                     </button>
                 )}
+
+                <h1>AI Meal Planner</h1>
+                {view && (
+                    <button
+                        onClick={() => setView(null)}
+                        className="back-button"
+                    >
+                        Favorites
+                    </button>
+                )}
+                
             </header>
 
             {/* Show main menu buttons if no view is selected */}
@@ -27,15 +38,15 @@ const App: React.FC = () => {
                         <p>Welcome to AI Meal Planner! Your personal assistant for delicious and healthy meals.</p>
                     </div>
                     <div className="menu-options">
-                        <button 
-                            onClick={() => setView("mealPlanner")} 
+                        <button
+                            onClick={() => setView("mealPlanner")}
                             className="menu-button planner-button"
                         >
                             <span className="button-icon">🥗</span>
                             <span className="button-text">Start Meal Planning</span>
                         </button>
-                        <button 
-                            onClick={() => setView("mealSelection")} 
+                        <button
+                            onClick={() => setView("mealSelection")}
                             className="menu-button selection-button"
                         >
                             <span className="button-icon">🍽️</span>
