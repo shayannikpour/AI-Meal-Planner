@@ -187,16 +187,16 @@ const MealSelection = () => {
         maxWidth: "1000px",
         margin: "0 auto",
         padding: "2rem",
-        backgroundColor: "#fff",
+        backgroundColor: "var(--color-button-bg)",
         borderRadius: "12px",
-        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+        boxShadow: "0 4px 20px var(--color-card-shadow)",
       }}
     >
       <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-        <h2 style={{ fontSize: "2.2rem", color: "#2c3e50", marginBottom: "0.5rem" }}>
+        <h2 style={{ fontSize: "2.2rem", color: "var(--color-text)", marginBottom: "0.5rem" }}>
           {t("chooseAMeal")}
         </h2>
-        <p style={{ color: "#7f8c8d", fontSize: "1.1rem", marginTop: 0 }}>
+        <p style={{ color: "var(--color-text-secondary)", fontSize: "1.1rem", marginTop: 0 }}>
           {t("popularMeals")}
         </p>
         <div style={{ margin: "20px 0", width: "100%", maxWidth: "500px", marginLeft: "auto", marginRight: "auto", position: "relative", display: "flex", justifyContent: "center" }}>
@@ -208,14 +208,14 @@ const MealSelection = () => {
             style={{
               width: "100%",
               padding: "12px 20px",
-              border: "2px solid #e0e0e0",
+              border: "2px solid var(--color-border)",
               borderRadius: "25px",
               fontSize: "16px",
               outline: "none",
               transition: "all 0.3s ease",
-              backgroundColor: "#ffffff",
-              color: "#333",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+              backgroundColor: "var(--color-button-bg)",
+              color: "var(--color-text)",
+              boxShadow: "0 2px 5px var(--color-card-shadow)",
             }}
           />
         </div>
@@ -245,12 +245,12 @@ const MealSelection = () => {
                 key={`upper-${index}`}
                 onClick={(e) => fetchMealRecipe(meal, 'upper', e)}
                 style={{
-                  backgroundColor: selectedMeal === meal ? '#4CAF50' : '#f8f9fa',
-                  color: selectedMeal === meal ? 'white' : '#333',
+                  backgroundColor: selectedMeal === meal ? 'var(--color-primary)' : 'var(--color-button-bg)',
+                  color: selectedMeal === meal ? 'white' : 'var(--color-text)',
                   fontWeight: 500,
                   padding: "0.8rem 1.5rem",
                   borderRadius: "30px",
-                  border: `2px solid ${selectedMeal === meal ? '#4CAF50' : '#e9ecef'}`,
+                  border: `2px solid ${selectedMeal === meal ? 'var(--color-primary)' : 'var(--color-border)'}`,
                   transition: "all 0.3s ease",
                   fontSize: "1rem",
                   whiteSpace: "nowrap",
@@ -287,12 +287,12 @@ const MealSelection = () => {
                 key={`middle-${index}`}
                 onClick={(e) => fetchMealRecipe(meal, 'middle', e)}
                 style={{
-                  backgroundColor: selectedMeal === meal ? '#4CAF50' : '#f8f9fa',
-                  color: selectedMeal === meal ? 'white' : '#333',
+                  backgroundColor: selectedMeal === meal ? 'var(--color-primary)' : 'var(--color-button-bg)',
+                  color: selectedMeal === meal ? 'white' : 'var(--color-text)',
                   fontWeight: 500,
                   padding: "0.8rem 1.5rem",
                   borderRadius: "30px",
-                  border: `2px solid ${selectedMeal === meal ? '#4CAF50' : '#e9ecef'}`,
+                  border: `2px solid ${selectedMeal === meal ? 'var(--color-primary)' : 'var(--color-border)'}`,
                   transition: "all 0.3s ease",
                   fontSize: "1rem",
                   whiteSpace: "nowrap",
@@ -329,12 +329,12 @@ const MealSelection = () => {
                 key={`lower-${index}`}
                 onClick={(e) => fetchMealRecipe(meal, 'lower', e)}
                 style={{
-                  backgroundColor: selectedMeal === meal ? '#4CAF50' : '#f8f9fa',
-                  color: selectedMeal === meal ? 'white' : '#333',
+                  backgroundColor: selectedMeal === meal ? 'var(--color-primary)' : 'var(--color-button-bg)',
+                  color: selectedMeal === meal ? 'white' : 'var(--color-text)',
                   fontWeight: 500,
                   padding: "0.8rem 1.5rem",
                   borderRadius: "30px",
-                  border: `2px solid ${selectedMeal === meal ? '#4CAF50' : '#e9ecef'}`,
+                  border: `2px solid ${selectedMeal === meal ? 'var(--color-primary)' : 'var(--color-border)'}`,
                   transition: "all 0.3s ease",
                   fontSize: "1rem",
                   whiteSpace: "nowrap",
@@ -376,20 +376,20 @@ const MealSelection = () => {
         <div
           style={{
             marginTop: "1.5rem",
-            backgroundColor: "#f9f9f9",
+            backgroundColor: "var(--color-button-bg)",
             borderRadius: "12px",
             padding: "1.5rem",
-            boxShadow: "inset 0 2px 8px rgba(0, 0, 0, 0.05)",
+            boxShadow: "inset 0 2px 8px var(--color-card-shadow)",
           }}
         >
           <h3
             style={{
               textAlign: "center",
               fontSize: "1.8rem",
-              color: "#2c3e50",
+              color: "var(--color-text)",
               marginBottom: "1.5rem",
               paddingBottom: "0.8rem",
-              borderBottom: "2px solid #e0e0e0",
+              borderBottom: "2px solid var(--color-border)",
             }}
           >
             {mealResponse.meal}
@@ -399,16 +399,16 @@ const MealSelection = () => {
             {/* Ingredients */}
             <div
               style={{
-                backgroundColor: "#fff",
+                backgroundColor: "var(--color-button-bg)",
                 borderRadius: "8px",
                 padding: "1.5rem",
-                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
+                boxShadow: "0 2px 10px var(--color-card-shadow)",
               }}
             >
-              <h4 style={{ color: "#2c3e50", marginTop: 0, paddingBottom: "0.5rem", borderBottom: "1px solid #e0e0e0", fontSize: "1.3rem" }}>
+              <h4 style={{ color: "var(--color-text)", marginTop: 0, paddingBottom: "0.5rem", borderBottom: "1px solid var(--color-border)", fontSize: "1.3rem" }}>
                 {t("ingredients")}
               </h4>
-              <ul style={{ paddingLeft: "1.5rem", color: "#555", marginTop: "1rem" }}>
+              <ul style={{ paddingLeft: "1.5rem", color: "var(--color-text-secondary)", marginTop: "1rem" }}>
                 {Array.isArray(mealResponse.ingredients) ? (
                   mealResponse.ingredients.map((ingredient, idx) => (
                     <li key={idx} style={{ marginBottom: "0.5rem" }}>
@@ -424,23 +424,23 @@ const MealSelection = () => {
             {/* Instructions */}
             <div
               style={{
-                backgroundColor: "#fff",
+                backgroundColor: "var(--color-button-bg)",
                 borderRadius: "8px",
                 padding: "1.5rem",
-                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
+                boxShadow: "0 2px 10px var(--color-card-shadow)",
               }}
             >
-              <h4 style={{ color: "#2c3e50", marginTop: 0, paddingBottom: "0.5rem", borderBottom: "1px solid #e0e0e0", fontSize: "1.3rem" }}>
+              <h4 style={{ color: "var(--color-text)", marginTop: 0, paddingBottom: "0.5rem", borderBottom: "1px solid var(--color-border)", fontSize: "1.3rem" }}>
                 {t("instructions")}
               </h4>
               <div
                 style={{
-                  color: "#555",
+                  color: "var(--color-text-secondary)",
                   lineHeight: 1.6,
                   whiteSpace: "pre-line",
                   padding: "1rem",
                   marginTop: "1rem",
-                  backgroundColor: "#f9fafb",
+                  backgroundColor: "var(--color-button-bg)",
                   borderRadius: "6px",
                 }}
               >
@@ -453,13 +453,13 @@ const MealSelection = () => {
           <div
             style={{
               marginTop: "2rem",
-              backgroundColor: "#fff",
+              backgroundColor: "var(--color-button-bg)",
               borderRadius: "8px",
               padding: "1.5rem",
-              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
+              boxShadow: "0 2px 10px var(--color-card-shadow)",
             }}
           >
-            <h4 style={{ color: "#2c3e50", marginTop: 0, marginBottom: "1rem" }}>
+            <h4 style={{ color: "var(--color-text)", marginTop: 0, marginBottom: "1rem" }}>
               {t("needAdjustments")}
             </h4>
             <div style={{ display: "flex", gap: "10px" }}>
@@ -471,11 +471,11 @@ const MealSelection = () => {
                 style={{
                   flex: 1,
                   padding: "0.8rem 1rem",
-                  border: "1px solid #ddd",
+                  border: "1px solid var(--color-border)",
                   borderRadius: "6px",
                   fontSize: "1rem",
-                  color: "#333",
-                  backgroundColor: "#fff",
+                  color: "var(--color-text)",
+                  backgroundColor: "var(--color-button-bg)",
                 }}
                 disabled={refiningLoading}
               />
@@ -485,7 +485,7 @@ const MealSelection = () => {
                   disabled={!userInput}
                   style={{
                     padding: "0.8rem 1.5rem",
-                    backgroundColor: "#4CAF50",
+                    backgroundColor: "var(--color-primary)",
                     color: "white",
                     border: "none",
                     borderRadius: "6px",
@@ -502,7 +502,7 @@ const MealSelection = () => {
                 <button
                   style={{
                     padding: "0.8rem 1.5rem",
-                    backgroundColor: "#cccccc",
+                    backgroundColor: "var(--color-border)",
                     color: "white",
                     border: "none",
                     borderRadius: "6px",
