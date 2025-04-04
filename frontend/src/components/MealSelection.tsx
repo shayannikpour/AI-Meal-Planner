@@ -12,7 +12,6 @@ const MealSelection = () => {
     const [loading, setLoading] = useState(false);
     const [refiningLoading, setRefiningLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    const [error, setError] = useState<string | null>(null);
     const { t, language } = useContext(LanguageContext);
 
     // Add useEffect to debug mealResponse changes
@@ -175,7 +174,6 @@ const MealSelection = () => {
         setLoading(true);
         setSelectedMeal(mealName);
         setMealResponse(null);
-        setError(null);
 
         try {
             // Get the original meal name by removing the 'meals_' prefix
@@ -196,15 +194,6 @@ const MealSelection = () => {
             console.error("Error fetching meal recipe:", error);
             if (axios.isAxiosError(error)) {
                 console.error("Error details:", error.response?.data);
-                
-                // Check if it's a rate limit error
-                if (error.response?.data?.details?.includes('UserByModelByDay')) {
-                    setError(t('aiRateLimitError') || 'The AI service is currently busy. Please try again in a few minutes.');
-                } else {
-                    setError(t('errorFetchingRecipe') || 'Error fetching recipe. Please try again.');
-                }
-            } else {
-                setError(t('errorFetchingRecipe') || 'Error fetching recipe. Please try again.');
             }
         } finally {
             setLoading(false);
@@ -295,12 +284,6 @@ const MealSelection = () => {
                 <div className="loading-container">
                     <div className="loading-spinner"></div>
                     <p>{t('loading')}</p>
-                </div>
-            )}
-
-            {error && (
-                <div className="error-container">
-                    <p className="error-message">{error}</p>
                 </div>
             )}
 
