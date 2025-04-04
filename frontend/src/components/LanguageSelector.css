@@ -10,17 +10,18 @@
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    background-color: var(--color-button-bg);
+    border: 1px solid var(--color-border);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px var(--color-card-shadow);
+    color: var(--color-text);
 }
 
 .language-button:hover {
-    background-color: #f8f9fa;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: var(--color-button-hover);
+    box-shadow: 0 4px 6px var(--color-card-shadow-hover);
 }
 
 .language-dropdown {
@@ -28,10 +29,10 @@
     top: 100%;
     right: 0;
     margin-top: 8px;
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    background-color: var(--color-button-bg);
+    border: 1px solid var(--color-border);
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px var(--color-card-shadow);
     overflow: hidden;
     width: 180px;
 }
@@ -46,14 +47,15 @@
     background: none;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    color: var(--color-text);
 }
 
 .language-option:hover {
-    background-color: #f8f9fa;
+    background-color: var(--color-button-hover);
 }
 
 .language-option.active {
-    background-color: #e9ecef;
+    background-color: var(--color-primary-light);
 }
 
 .language-flag {
@@ -65,7 +67,7 @@
 
 .language-name {
     font-size: 0.9rem;
-    color: #4a5568;
+    color: var(--color-text-secondary);
 }
 
 @media (max-width: 768px) {

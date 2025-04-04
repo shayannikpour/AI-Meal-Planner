@@ -9,40 +9,65 @@
   flex-direction: column;
 }
 
-.app-header {
+.app-top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 1rem;
+}
+
+.theme-toggle-btn {
+  background-color: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+  margin-right: auto;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--color-button-hover);
+  transform: translateY(0) rotate(15deg);
+}
+
+.app-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(230, 230, 230, 0.8);
+  border-bottom: 1px solid var(--color-border);
   position: relative;
 }
 
-/* Center the header title when on home page */
-.app-header.home-header {
-  justify-content: center;
-}
-
-/* Regular header (non-home) should keep space-between alignment */
-.app-header:not(.home-header) {
-  justify-content: space-between;
-}
-
 .app-header h1 {
-  color: #2c3e50;
+  color: var(--color-text);
   font-size: 2.5rem;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(90deg, #4CAF50, #2196F3);
+  background: var(--color-header-gradient);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
+.header-title {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.header-title:hover {
+  transform: scale(1.05);
+}
+
 .back-button {
   background-color: transparent;
-  color: #555;
+  color: var(--color-text-secondary);
   border: none;
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
@@ -50,12 +75,19 @@
   transition: all 0.2s;
   font-weight: 500;
   border-radius: 6px;
-  position: static;
+  position: absolute;
+  left: 0;
 }
 
 .back-button:hover {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: var(--color-button-hover);
+  color: var(--color-text);
+}
+
+/* Add positioning for favorites button */
+.back-button:last-child {
+  left: auto;
+  right: 0;
 }
 
 .main-menu {
@@ -75,7 +107,7 @@
 
 .menu-description p {
   font-size: 1.2rem;
-  color: #555;
+  color: var(--color-text-secondary);
   line-height: 1.6;
 }
 
@@ -92,7 +124,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #fff;
+  background-color: var(--color-button-bg);
   border: none;
   border-radius: 16px;
   padding: 2.5rem 1.5rem;
@@ -100,12 +132,12 @@
   max-width: 300px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 20px var(--color-card-shadow);
 }
 
 .menu-button:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 30px var(--color-card-shadow-hover);
 }
 
 .button-icon {
@@ -116,15 +148,15 @@
 .button-text {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text);
 }
 
 .planner-button {
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4eaf5 100%);
+  background: linear-gradient(135deg, var(--color-button-bg) 0%, var(--color-primary-light) 100%);
 }
 
 .selection-button {
-  background: linear-gradient(135deg, #f8f9fa 0%, #edf7ed 100%);
+  background: linear-gradient(135deg, var(--color-button-bg) 0%, var(--color-primary-light) 100%);
 }
 
 .content-container {
@@ -136,10 +168,10 @@
 .app-footer {
   text-align: center;
   padding: 1rem 0;
-  border-top: 1px solid rgba(230, 230, 230, 0.8);
+  border-top: 1px solid var(--color-border);
   margin-top: 2rem;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 768px) {
@@ -161,6 +193,15 @@
   .back-button {
     width: 100%;
     padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .app-top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .theme-toggle-btn {
     margin-bottom: 1rem;
   }
 }
