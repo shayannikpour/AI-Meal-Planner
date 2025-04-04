@@ -6,9 +6,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use App\Services\OllamaService;
 
 class MealPlannerController extends Controller
 {
+    protected $ollamaService;
+
+    public function __construct(OllamaService $ollamaService)
+    {
+        $this->ollamaService = $ollamaService;
+    }
+
     // Fetch all ingredients
     public function getIngredients()
     {
@@ -24,63 +32,41 @@ class MealPlannerController extends Controller
     // Generate a meal using Phi-3 AI
     public function generateMeal(Request $request)
     {
-        $ingredients = $request->input('ingredients', []);
-        $tags = $request->input('tags', []);
-
-        if (empty($ingredients)) {
-            return response()->json(['error' => 'No ingredients selected.'], 400);
-        }
-
-        // AI Prompt
-        $prompt = "Generate a meal using these ingredients: " . implode(", ", $ingredients) .
-            ". Consider these dietary preferences: " . implode(", ", $tags) . "." .
-            " Return the meal name, a list of ingredients, and step-by-step instructions. Make sure the language of the output is same as the language of this word " . implode(", ", $ingredients);
-
-        // API Configuration
-        $apiUrl = env('PHI3_API_URL');
-        $apiKey = env('PHI3_API_KEY');
-
-        if (!$apiUrl || !$apiKey) {
-            return response()->json(['error' => 'AI API configuration missing.'], 500);
-        }
-
         try {
-            // 1) Disable SSL verification for dev (NOT for production)
-            $client = new Client([
-                'verify' => false,
-            ]);
+            $ingredients = $request->input('ingredients', []);
+            $preferences = $request->input('preferences', []);
 
-            $response = $client->post($apiUrl, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'messages' => [
-                        ['role' => 'system', 'content' => 'You are a genius AI model'],
-                        ['role' => 'user', 'content' => $prompt]
-                    ],
-                    'model' => 'gpt-4o',
-                    'temperature' => 1,
-                    'max_tokens' => 4096,
-                    'top_p' => 1
-                ],
-            ]);
+            // Format ingredients and preferences for the prompt
+            $ingredientsList = implode(', ', $ingredients);
+            $preferencesList = implode(', ', $preferences);
 
-            $data = json_decode($response->getBody()->getContents(), true);
-
-            if (!isset($data['choices'][0]['message']['content'])) {
-                return response()->json(['error' => 'Invalid AI response', 'details' => $data], 500);
+            // Build the prompt
+            $prompt = "Generate a recipe using these ingredients: $ingredientsList\n\n";
+            if (!empty($preferences)) {
+                $prompt .= "Consider these dietary preferences: $preferencesList\n\n";
             }
+            $prompt .= "Please provide the recipe in this format:\n";
+            $prompt .= "Recipe: [Recipe Name]\n";
+            $prompt .= "Ingredients: [List all required ingredients with quantities]\n";
+            $prompt .= "Instructions: [Step by step cooking instructions]\n";
+            $prompt .= "\nMake sure to use the available ingredients: $ingredientsList";
 
-            return response()->json([
-                'meal' => 'AI Suggested Meal',
-                'ingredients' => [],
-                'instructions' => $data['choices'][0]['message']['content'],
-            ]);
+            $response = $this->ollamaService->generateResponse($prompt);
+            
+            return response()->json($response)
+                ->header('Access-Control-Allow-Origin', '*')
+                ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
         } catch (\Exception $e) {
-            Log::error("Phi-3 API Error: " . $e->getMessage());
-            return response()->json(['error' => 'Error generating meal.', 'details' => $e->getMessage()], 500);
+            Log::error('Meal generation error: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Failed to generate meal suggestion. Please try again.',
+                'details' => $e->getMessage()
+            ], 500)
+                ->header('Access-Control-Allow-Origin', '*')
+                ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         }
     }
 
@@ -96,90 +82,100 @@ class MealPlannerController extends Controller
         $formattedMeal = str_replace('_', ' ', $meal);
         $formattedMeal = ucwords($formattedMeal);
 
-        //Jask here
-        $prompt = "Give me the ingredients and step-by-step instructions for $formattedMeal. (Make sure the language of the output is same as the language of this word " . $meal . ")";
-
-        return $this->askAI($prompt);
+        try {
+            $prompt = "Generate a detailed recipe for $formattedMeal with the following format:\n\n";
+            $prompt .= "Recipe: $formattedMeal\n\n";
+            $prompt .= "Ingredients:\n[List of ingredients with quantities]\n\n";
+            $prompt .= "Instructions:\n[Step by step cooking instructions]\n\n";
+            $prompt .= "Please provide the recipe in a clear, easy to follow format.";
+            
+            $response = $this->ollamaService->generateResponse($prompt);
+            
+            return response()->json($response)
+                ->header('Access-Control-Allow-Origin', '*')
+                ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        } catch (\Exception $e) {
+            Log::error('Recipe generation error: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Failed to generate recipe. Please try again.',
+                'details' => $e->getMessage()
+            ], 500)
+                ->header('Access-Control-Allow-Origin', '*')
+                ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        }
     }
 
     public function refineRecipe(Request $request)
     {
-        $meal = $request->input('meal');
-        $issue = $request->input('issue');
+        try {
+            $meal = $request->input('meal');
+            $issue = $request->input('issue');
 
-        if (!$meal || !$issue) {
-            return response()->json(['error' => 'Meal name or issue missing.'], 400);
+            if (!$meal || !$issue) {
+                return response()->json(['error' => 'Meal name or issue missing.'], 400);
+            }
+
+            // Build a prompt that includes the current recipe and the modification request
+            $prompt = "I have a recipe for $meal and here's my request: $issue\n\n";
+            $prompt .= "Please provide an adjusted recipe that addresses this issue. Format the response as:\n\n";
+            $prompt .= "Recipe: [Recipe Name]\n";
+            $prompt .= "Ingredients: [List all required ingredients with quantities]\n";
+            $prompt .= "Instructions: [Step by step cooking instructions]\n";
+            
+            $response = $this->ollamaService->generateResponse($prompt);
+            
+            return response()->json($response)
+                ->header('Access-Control-Allow-Origin', '*')
+                ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+        } catch (\Exception $e) {
+            Log::error('Recipe refinement error: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Failed to refine recipe. Please try again.',
+                'details' => $e->getMessage()
+            ], 500)
+                ->header('Access-Control-Allow-Origin', '*')
+                ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         }
-
-        $prompt = "I am making $meal, but I have an issue: $issue. How can I adjust the recipe? (Make sure the language of the output is same as the language of this word " . $meal . ")";
-
-        return $this->askAI($prompt);
     }
 
-    private function askAI($prompt)
+    public function generateRecipe(Request $request)
     {
-        $apiUrl = env('PHI3_API_URL');
-        $apiKey = env('PHI3_API_KEY');
-
         try {
-            // 1) Disable SSL verification for dev (NOT for production)
-            $client = new Client([
-                'verify' => false,
-            ]);
-
-            $response = $client->post($apiUrl, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'You are an expert chef. Always return a JSON object with this structure: {"meal": "Meal Name", "ingredients": ["ingredient1", "ingredient2"], "instructions": "Step-by-step instructions"}. Do NOT include anything outside of this JSON format.'
-                        ],
-                        ['role' => 'user', 'content' => $prompt]
-                    ],
-                    'model' => 'gpt-4o',
-                    'temperature' => 1,
-                    'max_tokens' => 4096,
-                    'top_p' => 1
-                ],
-            ]);
-
-            // Get AI raw response
-            $responseBody = $response->getBody()->getContents();
-            Log::info("🔍 AI Raw Response: " . $responseBody);
-
-            $data = json_decode($responseBody, true);
-
-            // Check if AI returned a valid structure
-            if (!isset($data['choices'][0]['message']['content'])) {
-                Log::error("❌ AI Response Missing Content: " . json_encode($data));
-                return response()->json(['error' => 'AI returned an invalid format', 'raw_response' => $data], 500);
-            }
-
-            // Get the AI's message content
-            $content = $data['choices'][0]['message']['content'];
-            Log::info("🛠️ AI Content Before Parsing: " . $content);
-
-            // 2) Strip code fences (```json ... ```), if present
-            $content = str_replace(["```json", "```"], "", $content);
-
-            // Attempt to parse the JSON
-            $aiResponse = json_decode($content, true);
-
-            // Check if JSON decoding was successful
-            if (!is_array($aiResponse) || !isset($aiResponse['meal'])) {
-                Log::error("❌ Invalid AI JSON format: " . $content);
-                return response()->json(['error' => 'AI did not return structured JSON', 'raw_response' => $content], 500);
-            }
-
-            Log::info("✅ Parsed AI Response: " . json_encode($aiResponse));
-            return response()->json($aiResponse);
+            $preferences = $request->input('preferences', []);
+            $prompt = $this->buildPrompt($preferences);
+            
+            $response = $this->ollamaService->generateResponse($prompt);
+            
+            return response()->json($response);
         } catch (\Exception $e) {
-            Log::error("🔥 AI API Error: " . $e->getMessage());
-            return response()->json(['error' => 'Error generating meal.', 'details' => $e->getMessage()], 500);
+            Log::error('Recipe generation error: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Failed to generate recipe. Please try again.'
+            ], 500);
         }
+    }
+
+    private function buildPrompt($preferences)
+    {
+        $prompt = "Generate a recipe with the following format:\n\n";
+        $prompt .= "Recipe: [Recipe Name]\n\n";
+        $prompt .= "Ingredients:\n[List of ingredients with quantities]\n\n";
+        $prompt .= "Instructions:\n[Step by step cooking instructions]\n\n";
+        
+        if (!empty($preferences)) {
+            $prompt .= "Please consider these preferences:\n";
+            foreach ($preferences as $key => $value) {
+                $prompt .= "- $key: $value\n";
+            }
+        }
+        
+        $prompt .= "\nPlease provide the recipe in a clear, easy to follow format.";
+        
+        return $prompt;
     }
 }

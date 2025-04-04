@@ -1,3 +1,11 @@
+import { useContext } from 'react';
+import { LanguageContext } from '../App';
+
+export const useTranslation = () => {
+  const { t } = useContext(LanguageContext);
+  return { t };
+};
+
 interface Translations {
     [key: string]: {
         welcome: string;
@@ -5,6 +13,9 @@ interface Translations {
         chooseAMeal: string;
         back: string;
         favorites: string;
+        favoritesDescription: string;
+        addToFavorites: string;
+        noFavorites: string;
         teamMembers: string;
         // Meal Selection translations
         popularMeals: string;
@@ -360,6 +371,9 @@ interface Translations {
         meals_tunaMelt: string;
         meals_artichokePizza: string;
         meals_garlicRoastedPotatoes: string;
+        start: string;
+        addedToFavorites: string;
+        alreadyInFavorites: string;
     };
 }
 
@@ -370,6 +384,9 @@ const translations: Translations = {
         chooseAMeal: 'Choose a Meal',
         back: '← Back to Main Menu',
         favorites: 'Favorites',
+        favoritesDescription: 'Your saved favorite recipes',
+        addToFavorites: 'Add to Favorites',
+        noFavorites: 'No favorite meals yet. Add some from the meal selection page!',
         teamMembers: 'Team Members: Shayan, Mitchell, Eddie, Jaskunwar',
         // Meal Selection translations
         popularMeals: 'Select from our curated collection of delicious recipes',
@@ -725,6 +742,9 @@ const translations: Translations = {
         meals_tunaMelt: 'Tuna Melt',
         meals_artichokePizza: 'Artichoke Pizza',
         meals_garlicRoastedPotatoes: 'Garlic Roasted Potatoes',
+        start: "Start",
+        addedToFavorites: "✨ Added to your favorites! Check the favorites page to view your saved meals.",
+        alreadyInFavorites: "This meal is already in your favorites!"
     },
     es: {
         welcome: '¡Bienvenido a AI Meal Planner! Tu asistente personal para comidas deliciosas y saludables.',
@@ -732,6 +752,9 @@ const translations: Translations = {
         chooseAMeal: 'Elegir una comida',
         back: '← Volver al menú principal',
         favorites: 'Favoritos',
+        favoritesDescription: 'Tus recetas favoritas guardadas',
+        addToFavorites: 'Añadir a Favoritos',
+        noFavorites: '¡Aún no hay comidas favoritas. ¡Añade algunas desde la página de selección de comidas!',
         teamMembers: 'Miembros del equipo: Shayan, Mitchell, Eddie, Jaskunwar',
         // Meal Selection translations
         popularMeals: 'Selecciona de nuestra colección de deliciosas recetas',
@@ -973,20 +996,20 @@ const translations: Translations = {
         meals_mexicanRiceBowl: 'Tazón de Arroz Mexicano',
         meals_buffaloChickenSandwich: 'Sandwich de Pollo Buffalo',
         meals_pestoChickenPizza: 'Pizza de Pollo Pesto',
-        meals_steamedBaoBuns: 'Bun de Bao Horneado',
+        meals_steamedBaoBuns: 'Buns de Bao Horneado',
         meals_thaiBasilChicken: 'Pollo con Ajo de Tailandés',
         meals_cornbreadAndChili: 'Tostada de Maíz y Chili',
         meals_cheesyBroccoliBake: 'Torta de Broccoli',
         meals_beefKofta: 'Kofta de Carne',
-        meals_roastedCauliflowerTacos: 'Tacos de Cauliflower Horneados',
-        meals_mangoAvocadoSalad: 'Ensalada de Mango y Aguacate',
-        meals_lemonGarlicPasta: 'Pasta de Ajo y Limón',
-        meals_roastedVegetableFlatbread: 'Pan de Vegetales Horneado',
-        meals_chickenAvocadoSandwich: 'Sandwich de Pollo y Aguacate',
+        meals_roastedCauliflowerTacos: 'Tacos de Chou-fleur Rôtis',
+        meals_mangoAvocadoSalad: 'Salade Mangue-Avocat',
+        meals_lemonGarlicPasta: 'Pâte à l\'Ail et au Limon',
+        meals_roastedVegetableFlatbread: 'Pain Plat de Légumes Rôti',
+        meals_chickenAvocadoSandwich: 'Sandwich de Poulet au Avocat',
         meals_eggSaladSandwich: 'Sandwich de Huevo',
-        meals_cubanSandwich: 'Sandwich Cubano',
+        meals_cubanSandwich: 'Sandwich Cubain',
         meals_shrimpGrits: 'Shrimp and Grits',
-        meals_pumpkinRisotto: 'Risotto de Calabaza',
+        meals_pumpkinRisotto: 'Risotto de Pomme de Terre',
         meals_lambMoussaka: 'Moussaka de Lomo',
         meals_italianSub: 'Sub Italiano',
         meals_chickenTikkaMasala: 'Pollo Tikka Masala',
@@ -1001,30 +1024,30 @@ const translations: Translations = {
         meals_mushroomWellington: 'Filete de Lomo Horneado',
         meals_hotAndSourSoup: 'Sopa Picante',
         meals_bakedEggplant: 'Berenjena Horneada',
-        meals_friedChickenSandwich: 'Sandwich de Pollo Frito',
+        meals_friedChickenSandwich: 'Sandwich de Poulet Frit',
         meals_veggieSushi: 'Sushi Vegetariano',
         meals_sobaNoodlesWithVeggies: 'Soba Noodles con Verduras',
         meals_misoRamen: 'Ramen Miso',
-        meals_gingerPork: 'Carne de Ajo',
-        meals_sesameChicken: 'Pollo de Sésamo',
-        meals_stuffedTomatoes: 'Tomates Rellenos',
-        meals_roastedBeetSalad: 'Ensalada de Remolacha Horneada',
-        meals_nicoiseSalad: 'Ensalada Nicoise',
-        meals_beefCurry: 'Curry de Carne',
-        meals_salmonAvocadoRoll: 'Roll de Salmón y Aguacate',
+        meals_gingerPork: 'Bœuf Ginger',
+        meals_sesameChicken: 'Poulet au Sésame',
+        meals_stuffedTomatoes: 'Tomates Remplis',
+        meals_roastedBeetSalad: 'Ensalada de Remoulade Rôtie',
+        meals_nicoiseSalad: 'Salade Nicoise',
+        meals_beefCurry: 'Curry de Bœuf',
+        meals_salmonAvocadoRoll: 'Rouleau de Saumon et Avocat',
         meals_tofuCurry: 'Curry de Tofu',
-        meals_baconWrappedDates: 'Framboises Rellenas',
+        meals_baconWrappedDates: 'Framboises Roulées',
         meals_avocadoEggSalad: 'Ensalada de Huevo y Aguacate',
         meals_roastedTurkeyBreast: 'Pecho de Pavo Horneado',
         meals_spaghettiAglioEOlio: 'Spaghetti Aglio e Olio',
         meals_veganMacAndCheese: 'Mac y Queso Vegano',
         meals_sweetPotatoFries: 'Patatas de Papa Dulce',
-        meals_brusselsSproutsWithBacon: 'Brusselas con Panceta',
-        meals_couscousSalad: 'Ensalada de Couscous',
+        meals_brusselsSproutsWithBacon: 'Chou-de-Bruxelles avec Pancette',
+        meals_couscousSalad: 'Salade de Couscous',
         meals_lobsterBisque: 'Cazuela de Langosta',
         meals_trufflePasta: 'Pasta con Trufa',
-        meals_ricottaPancakes: 'Panqueques de Ricotta',
-        meals_blueberryWaffles: 'Waffles de Arándanos',
+        meals_ricottaPancakes: 'Pancakes de Ricotta',
+        meals_blueberryWaffles: 'Waffles aux Framboises',
         meals_grilledShrimpSkewers: 'Brochetas de Camarón',
         meals_spaghettiWithMeatballs: 'Spaghetti con Bolas de Carne',
         meals_frenchCrepes: 'Crepes Franceses',
@@ -1041,12 +1064,12 @@ const translations: Translations = {
         meals_baconFriedRice: 'Arroz Frito de Panceta',
         meals_ovenBakedFalafel: 'Falafel Horneado',
         meals_smokedSalmonBagel: 'Bagel de Salmón Fumado',
-        meals_jerkChicken: 'Pollo a la Jerk',
-        meals_tomatoBasilSoup: 'Sopa de Tomate y Ajo',
-        meals_pineappleChickenRice: 'Arroz de Pollo con Piña',
+        meals_jerkChicken: 'Poulet à la Jerk',
+        meals_tomatoBasilSoup: 'Soupe au Tomate et Ail',
+        meals_pineappleChickenRice: 'Riz de Poulet au Pêche',
         meals_stuffedPortobelloMushrooms: 'Champiñones Rellenos',
         meals_chickenYakisoba: 'Yakisoba',
-        meals_ramenWithSoftBoiledEgg: 'Ramen con Huevo Duro',
+        meals_ramenWithSoftBoiledEgg: 'Ramen avec Œuf Dur',
         meals_moroccanCouscous: 'Couscous Marroquí',
         meals_lemonDillChicken: 'Pollo de Limón y Perejil',
         meals_chimichurriSteak: 'Ternera a la Chimichurri',
@@ -1056,18 +1079,18 @@ const translations: Translations = {
         meals_mangoSalsaChicken: 'Pollo con Salsa de Mango',
         meals_garlicParmesanWings: 'Alares de Ajo y Parmesano',
         meals_broccoliStirFry: 'Broccoli Sauté',
-        meals_cabbageRolls: 'Rollos de Col',
+        meals_cabbageRolls: 'Rollos de Chou',
         meals_shreddedPorkTacos: 'Tacos de Lomo Desmenuzado',
         meals_fajitaBowl: 'Tazón de Fajitas',
-        meals_pumpkinSoup: 'Sopa de Calabaza',
-        meals_beefAndBeanBurritos: 'Burritos de Carne y Frijol',
-        meals_cornFritters: 'Frituras de Maíz',
-        meals_vietnameseSpringRolls: 'Rollos de Primavera',
+        meals_pumpkinSoup: 'Sopa de Pomme de Terre',
+        meals_beefAndBeanBurritos: 'Burritos de Bœuf et Fève',
+        meals_cornFritters: 'Fritures de Maïs',
+        meals_vietnameseSpringRolls: 'Roulées de Printemps',
         meals_chickenPestoPasta: 'Pasta de Pesto',
         meals_steamedMussels: 'Mussels Horneados',
         meals_roastedChickpeas: 'Chichpeas Horneadas',
-        meals_koreanFriedChicken: 'Pollo Frito Coreano',
-        meals_porkGyoza: 'Gyoza de Cerdo',
+        meals_koreanFriedChicken: 'Pollo Frit Coréen',
+        meals_porkGyoza: 'Gyoza de Porc',
         meals_miniQuiches: 'Mini Quiches',
         meals_thaiLarb: 'Thai Larb',
         meals_shrimpToast: 'Tostada de Camarón',
@@ -1076,8 +1099,8 @@ const translations: Translations = {
         meals_brieAndAppleSandwich: 'Sandwich de Brie y Manzana',
         meals_savoryCrepes: 'Crepes Savory',
         meals_duckConfit: 'Confit de Pato',
-        meals_gheeRoastChicken: 'Pollo Horneado',
-        meals_paprikaChicken: 'Pollo Picante',
+        meals_gheeRoastChicken: 'Poulet Rôti',
+        meals_paprikaChicken: 'Poulet Picant',
         meals_okraAndTomatoes: 'Okra y Tomates',
         meals_smokedBrisket: 'Lomo Fumado',
         meals_szechuanTofu: 'Tofu Szechuan',
@@ -1085,8 +1108,11 @@ const translations: Translations = {
         meals_pineappleSalsaFish: 'Pescado con Salsa de Piña',
         meals_creamedSpinach: 'Espinaca Crema',
         meals_tunaMelt: 'Tuna Melt',
-        meals_artichokePizza: 'Pizza de Alcachofa',
+        meals_artichokePizza: 'Pizza d\'Artichaut',
         meals_garlicRoastedPotatoes: 'Patatas Horneadas',
+        start: "Comenzar",
+        addedToFavorites: "✨ ¡Añadido a tus favoritos! Visita la página de favoritos para ver tus comidas guardadas.",
+        alreadyInFavorites: "¡Esta comida ya está en tus favoritos!"
     },
     fr: {
         welcome: 'Bienvenue sur AI Meal Planner ! Votre assistant personnel pour des repas délicieux et sains.',
@@ -1094,6 +1120,9 @@ const translations: Translations = {
         chooseAMeal: 'Choisir un repas',
         back: '← Retour au menu principal',
         favorites: 'Favoris',
+        favoritesDescription: 'Vos recettes favorites enregistrées',
+        addToFavorites: 'Ajouter aux favoris',
+        noFavorites: 'Aucun repas encore en favoris. Ajoutez-en depuis la page de sélection de repas !',
         teamMembers: 'Membres de l\'équipe : Shayan, Mitchell, Eddie, Jaskunwar',
         // Meal Selection translations
         popularMeals: 'Sélectionnez parmi notre collection de délicieuses recettes',
@@ -1387,7 +1416,7 @@ const translations: Translations = {
         meals_trufflePasta: 'Pâte à la Truffe',
         meals_ricottaPancakes: 'Pancakes de Ricotta',
         meals_blueberryWaffles: 'Waffles aux Framboises',
-        meals_grilledShrimpSkewers: 'Brochettes de Crevette',
+        meals_grilledShrimpSkewers: 'Brochettes de Camarón',
         meals_spaghettiWithMeatballs: 'Spaghetti avec des Boules de Viande',
         meals_frenchCrepes: 'Crepes Françaises',
         meals_bbqRibs: 'Ribs BBQ',
@@ -1406,7 +1435,7 @@ const translations: Translations = {
         meals_jerkChicken: 'Poulet à la Jerk',
         meals_tomatoBasilSoup: 'Soupe au Tomate et Ail',
         meals_pineappleChickenRice: 'Riz de Poulet au Pêche',
-        meals_stuffedPortobelloMushrooms: 'Champignons Remplis',
+        meals_stuffedPortobelloMushrooms: 'Champiñones Rellenos',
         meals_chickenYakisoba: 'Yakisoba',
         meals_ramenWithSoftBoiledEgg: 'Ramen avec Œuf Dur',
         meals_moroccanCouscous: 'Couscous Marocain',
@@ -1419,7 +1448,7 @@ const translations: Translations = {
         meals_garlicParmesanWings: 'Ailes de Ail et Parmesan',
         meals_broccoliStirFry: 'Broccoli Sauté',
         meals_cabbageRolls: 'Roulades de Chou',
-        meals_shreddedPorkTacos: 'Tacos de Lard Déshabillé',
+        meals_shreddedPorkTacos: 'Tacos de Lomo Desmenuzado',
         meals_fajitaBowl: 'Tazin de Fajitas',
         meals_pumpkinSoup: 'Soupe de Pomme de Terre',
         meals_beefAndBeanBurritos: 'Burritos de Bœuf et Fève',
@@ -1441,7 +1470,7 @@ const translations: Translations = {
         meals_gheeRoastChicken: 'Poulet Rôti',
         meals_paprikaChicken: 'Poulet Picant',
         meals_okraAndTomatoes: 'Okra et Tomates',
-        meals_smokedBrisket: 'Lard Smoked',
+        meals_smokedBrisket: 'Lomo Fumado',
         meals_szechuanTofu: 'Tofu Szechuan',
         meals_beefTeriyaki: 'Bœuf Teriyaki',
         meals_pineappleSalsaFish: 'Poisson avec Salsa de Pêche',
@@ -1449,6 +1478,9 @@ const translations: Translations = {
         meals_tunaMelt: 'Tuna Melt',
         meals_artichokePizza: 'Pizza d\'Artichaut',
         meals_garlicRoastedPotatoes: 'Pommes de Terre Rôties',
+        start: "Commencer",
+        addedToFavorites: "✨ Ajouté à vos favoris ! Consultez la page des favoris pour voir vos repas enregistrés.",
+        alreadyInFavorites: "Ce repas est déjà dans vos favoris !"
     },
     zh: {
         welcome: '欢迎使用AI膳食规划师！您的美味健康餐点个人助手。',
@@ -1456,6 +1488,9 @@ const translations: Translations = {
         chooseAMeal: '选择餐点',
         back: '← 返回主菜单',
         favorites: '收藏夹',
+        favoritesDescription: '您保存的喜欢的食谱',
+        addToFavorites: '添加到收藏夹',
+        noFavorites: '还没有喜欢的餐点。从餐点选择页面添加一些吧！',
         teamMembers: '团队成员：Shayan, Mitchell, Eddie, Jaskunwar',
         // Meal Selection translations
         popularMeals: '从我们精选的美味食谱中选择',
@@ -1811,6 +1846,9 @@ const translations: Translations = {
         meals_tunaMelt: '金枪鱼融化',
         meals_artichokePizza: '洋蓟披萨',
         meals_garlicRoastedPotatoes: '烤大蒜土豆',
+        start: "开始膳食规划",
+        addedToFavorites: "✨ Added to your favorites! Check the favorites page to view your saved meals.",
+        alreadyInFavorites: "✨ Added to your favorites! Check the favorites page to view your saved meals."
     },
 };
 

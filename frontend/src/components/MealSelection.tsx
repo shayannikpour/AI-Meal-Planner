@@ -1,9 +1,18 @@
 import { useState, useMemo, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { LanguageContext } from "../App";
+import Cookies from 'js-cookie';
 import "./MealSelection.css";
 
-const API_BASE_URL = "http://localhost:8000/api"; // Laravel API base URL
+const API_BASE_URL = "http://127.0.0.1:8000/api"; // Laravel API base URL
+
+interface FavoriteMeal {
+  id: string;
+  image: string;
+  nameKey: string;
+  calories: number;
+}
 
 const MealSelection = () => {
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
@@ -26,6 +35,7 @@ const MealSelection = () => {
   const [lowerRowTransform, setLowerRowTransform] = useState<string>("");
   
   const { t, language } = useContext(LanguageContext);
+  const navigate = useNavigate();
 
   // Upper row of recipes (scrolls right to left) - First set of unique recipes
   const upperRecipes = [
@@ -133,19 +143,32 @@ const MealSelection = () => {
     setActiveRow(rowType);
 
     try {
-      const originalMealName = mealName.replace("meals_", "");
+      const originalMealName = mealName.replace("meals_", "").split(/(?=[A-Z])/).join(" ");
       console.log("Sending meal name to API:", originalMealName);
       const response = await axios.post(`${API_BASE_URL}/get-recipe`, { meal: originalMealName });
       console.log("API Response:", response.data);
+      
+      if (response.data.error) {
+        throw new Error(response.data.error);
+      }
+      
+      if (!response.data.meal || !response.data.ingredients || !response.data.instructions) {
+        throw new Error("Invalid recipe format received from server");
+      }
+      
       setMealResponse(response.data);
-    } catch (err) {
-      console.error("Error fetching meal recipe:", err);
-      if (axios.isAxiosError(err)) {
-        if (err.response?.data?.details?.includes("UserByModelByDay")) {
+    } catch (error: unknown) {
+      console.error("Error fetching meal recipe:", error);
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 500) {
+          setError(t("serverError") || "Server error. Please try again later.");
+        } else if (error.response?.data?.details?.includes("UserByModelByDay")) {
           setError(t("aiRateLimitError") || "AI is busy. Please try again later.");
         } else {
           setError(t("errorFetchingRecipe") || "Error fetching recipe. Please try again.");
         }
+      } else if (error instanceof Error) {
+        setError(error.message || t("errorFetchingRecipe") || "Error fetching recipe. Please try again.");
       } else {
         setError(t("errorFetchingRecipe") || "Error fetching recipe. Please try again.");
       }
@@ -181,6 +204,50 @@ const MealSelection = () => {
     setHoverRow(null);
   };
 
+  const addToFavorites = () => {
+    if (!selectedMeal) return;
+
+    const savedFavorites = Cookies.get('favorites');
+    let favorites: FavoriteMeal[] = [];
+    
+    if (savedFavorites) {
+      try {
+        favorites = JSON.parse(savedFavorites);
+      } catch (e) {
+        console.error('Error parsing favorites:', e);
+      }
+    }
+
+    // Check if meal is already in favorites
+    const isFavorite = favorites.some(fav => fav.nameKey === selectedMeal);
+    
+    if (!isFavorite) {
+      const cleanMealName = selectedMeal.replace('meals_', '').split(/(?=[A-Z])/).join(' ');
+      
+      const newFavorite: FavoriteMeal = {
+        id: Math.random().toString(36).substr(2, 9),
+        nameKey: selectedMeal,
+        image: `https://source.unsplash.com/400x300/?${cleanMealName.replace(/\s+/g, '-')}`,
+        calories: Math.floor(Math.random() * (800 - 300) + 300)
+      };
+      
+      favorites.push(newFavorite);
+
+      try {
+        Cookies.set('favorites', JSON.stringify(favorites), { 
+          expires: 365,
+          path: '/',
+          sameSite: 'lax',
+          secure: false
+        });
+      } catch (error) {
+        console.error('Error saving cookie:', error);
+      }
+    }
+    // Always navigate to favorites page
+    navigate('/favorites');
+  };
+
   return (
     <div
       style={{
@@ -190,12 +257,49 @@ const MealSelection = () => {
         backgroundColor: "var(--color-button-bg)",
         borderRadius: "12px",
         boxShadow: "0 4px 20px var(--color-card-shadow)",
+        position: "relative"
       }}
     >
       <div style={{ textAlign: "center", marginBottom: "2rem" }}>
         <h2 style={{ fontSize: "2.2rem", color: "var(--color-text)", marginBottom: "0.5rem" }}>
           {t("chooseAMeal")}
         </h2>
+        
+        {/* Star Button - only show when a meal is selected */}
+        {selectedMeal && (
+          <button
+            onClick={addToFavorites}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              width: '40px',
+              height: '40px',
+              backgroundColor: 'var(--color-button-bg)',
+              color: '#4CAF50',
+              border: '1px solid var(--color-border)',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontSize: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 6px var(--color-card-shadow)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 4px 8px var(--color-card-shadow)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 6px var(--color-card-shadow)';
+            }}
+          >
+            ⭐
+          </button>
+        )}
+
         <p style={{ color: "var(--color-text-secondary)", fontSize: "1.1rem", marginTop: 0 }}>
           {t("popularMeals")}
         </p>
