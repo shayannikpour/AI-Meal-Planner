@@ -8,7 +8,7 @@
   /* Heading for the tags */
   .tag-list-heading {
     font-size: 1.5rem;
-    color: #333;
+    color: var(--color-text);
     margin-bottom: 10px;
   }
   
@@ -24,27 +24,30 @@
     padding: 8px 0;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    color: var(--color-text);
   }
   
   /* Hover effect */
   .tag-list li:hover {
-    background-color: #f2f2f2;
+    background-color: var(--color-button-hover);
   }
   
   /* Class to indicate a selected tag */
   .tag-list li.selected {
     font-weight: bold;
-    color: #007BFF;
+    color: var(--color-primary);
   }
   
   /* Selected tags display */
   .selected-tags-title {
     margin-top: 20px;
     font-weight: bold;
+    color: var(--color-text);
   }
   
   .selected-tags-text {
     font-style: italic;
     margin-top: 5px;
+    color: var(--color-text-secondary);
   }
   
