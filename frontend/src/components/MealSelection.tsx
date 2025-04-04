@@ -1,365 +1,525 @@
 import { useState, useMemo, useContext, useEffect } from "react";
 import axios from "axios";
-import { LanguageContext } from '../App';
+import { LanguageContext } from "../App";
 import "./MealSelection.css";
 
 const API_BASE_URL = "http://localhost:8000/api"; // Laravel API base URL
 
 const MealSelection = () => {
-    const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
-    const [mealResponse, setMealResponse] = useState<{ meal: string, ingredients: string[], instructions: string } | null>(null);
-    const [userInput, setUserInput] = useState<string>("");
-    const [loading, setLoading] = useState(false);
-    const [refiningLoading, setRefiningLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [error, setError] = useState<string | null>(null);
-    const { t, language } = useContext(LanguageContext);
+  const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
+  const [mealResponse, setMealResponse] = useState<{
+    meal: string;
+    ingredients: string[];
+    instructions: string;
+  } | null>(null);
+  const [userInput, setUserInput] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [refiningLoading, setRefiningLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [activeRow, setActiveRow] = useState<string | null>(null);
+  const [hoverRow, setHoverRow] = useState<string | null>(null);
+  
+  // Store the current transforms when a carousel is clicked
+  const [upperRowTransform, setUpperRowTransform] = useState<string>("");
+  const [middleRowTransform, setMiddleRowTransform] = useState<string>("");
+  const [lowerRowTransform, setLowerRowTransform] = useState<string>("");
+  
+  const { t, language } = useContext(LanguageContext);
 
-    // Add useEffect to debug mealResponse changes
-    useEffect(() => {
-        console.log('mealResponse changed:', mealResponse);
-    }, [mealResponse]);
+  // Upper row of recipes (scrolls right to left) - First set of unique recipes
+  const upperRecipes = [
+      t('meals_spaghettiCarbonara'), t('meals_grilledChickenRice'), t('meals_vegetableStirFry'), 
+      t('meals_salmonLemonButter'), t('meals_beefTacos'),
+      t('meals_mushroomRisotto'), t('meals_thaiGreenCurry'), t('meals_margheritaPizza'), 
+      t('meals_beefStroganoff'), t('meals_greekSalad'),
+      t('meals_butterChicken'), t('meals_stuffedBellPeppers'), t('meals_tunaCasserole'), 
+      t('meals_eggplantParmesan'), t('meals_chickenFajitas'),
+      t('meals_pulledPorkSandwiches'), t('meals_gnocchiPesto'), t('meals_spinachRicottaCannelloni'), 
+      t('meals_bakedZiti'), t('meals_koreanBibimbap')
+  ];
 
-    // Upper row of recipes (scrolls right to left)
-    const upperRecipes = [
-        t('meals_spaghettiCarbonara'), t('meals_grilledChickenRice'), t('meals_vegetableStirFry'), 
-        t('meals_salmonLemonButter'), t('meals_beefTacos'),
-        t('meals_mushroomRisotto'), t('meals_thaiGreenCurry'), t('meals_margheritaPizza'), 
-        t('meals_beefStroganoff'), t('meals_greekSalad'),
-        t('meals_butterChicken'), t('meals_stuffedBellPeppers'), t('meals_tunaCasserole'), 
-        t('meals_eggplantParmesan'), t('meals_chickenFajitas'),
-        t('meals_pulledPorkSandwiches'), t('meals_gnocchiPesto'), t('meals_spinachRicottaCannelloni'), 
-        t('meals_bakedZiti'), t('meals_koreanBibimbap'),
-        t('meals_bangersAndMash'), t('meals_jambalaya'), t('meals_moroccanTagine'), 
-        t('meals_fishAndChips'), t('meals_bakedMacAndCheese'),
-        t('meals_chiliConCarne'), t('meals_ratatouille'), t('meals_bulgogiBeef'), 
-        t('meals_quicheLorraine'), t('meals_pho'),
-        t('meals_paella'), t('meals_sweetAndSourChicken'), t('meals_porkSchnitzel'), 
-        t('meals_fettuccineAlfredo'),
-        t('meals_tandooriChicken'), t('meals_zucchiniNoodlesMarinara'), t('meals_lentilSoup'), 
-        t('meals_shepherdsPie'), t('meals_falafelWraps'),
-        t('meals_ceviche'), t('meals_steakFrites'), t('meals_chickenKatsuCurry'), 
-        t('meals_nasiGoreng'), t('meals_gyozaDumplings'),
-        t('meals_risottoMilanese'), t('meals_beefWellington'), t('meals_chickenParmesan'), 
-        t('meals_croqueMonsieur'), t('meals_roastDuckOrangeSauce'),
-        t('meals_coconutChickenCurry'), t('meals_moussaka'), t('meals_shrimpTacos'), 
-        t('meals_avocadoToast'), t('meals_kimchiFriedRice'),
-        t('meals_lasagna'), t('meals_japaneseCurry'), t('meals_calamari'), 
-        t('meals_chickenShawarma'), t('meals_porkRamen'),
-        t('meals_steamedDumplings'), t('meals_vietnameseBanhMi'), t('meals_beefEnchiladas'), 
-        t('meals_bruschetta'), t('meals_chickenCacciatore'),
-        t('meals_pulledJackfruitTacos'), t('meals_tortelliniAlfredo'), t('meals_gingerChickenStirFry'), 
-        t('meals_barbacoaBeef'), t('meals_steakQuesadilla'),
-        t('meals_sushiRolls'), t('meals_okonomiyaki'), t('meals_mapoTofu'), 
-        t('meals_shakshuka'), t('meals_halloumiBurgers'),
-        t('meals_chickenCaesarWraps'), t('meals_turkeyMeatballs'), t('meals_pastaPrimavera'), 
-        t('meals_tofuPadSeeEw'), t('meals_arrozConPollo'),
-        t('meals_crabCakes'), t('meals_gumbo'), t('meals_biryani'), 
-        t('meals_beefBulgogiBowls'), t('meals_hoisinDuckWraps'),
-        t('meals_spinachPie'), t('meals_chickenPotPie'), t('meals_bakedFalafel'), 
-        t('meals_prawnLinguine'), t('meals_charSiuPork'),
-        t('meals_capreseSalad'), t('meals_cottagePie'), t('meals_stuffedCabbageRolls'), 
-        t('meals_tempuraUdon'), t('meals_hamAndCheeseCroquettes'),
-        t('meals_frenchOnionSoup'), t('meals_sobaNoodleBowl'), t('meals_grilledSeaBass'), 
-        t('meals_pekingDuck'), t('meals_seafoodPaella'),
-        t('meals_polentaMushrooms'), t('meals_beetrootSalad'), t('meals_chickenTagine'), 
-        t('meals_vegetarianChili'), t('meals_stuffedMushrooms')
-    ];
+  // Middle row of recipes - Second set of unique recipes
+  const middleRecipes = [
+      t('meals_chickenAlfredo'), t('meals_tofuStirFry'), t('meals_beefAndBroccoli'), 
+      t('meals_tunaSalad'), t('meals_bbqChickenPizza'),
+      t('meals_eggFriedRice'), t('meals_bakedPotatoesCheese'), t('meals_chickpeaCurry'), 
+      t('meals_meatballSubs'), t('meals_shreddedChickenEnchiladas'),
+      t('meals_pastaBolognese'), t('meals_salmonTeriyaki'), t('meals_crispyTofuTacos'), 
+      t('meals_eggplantStirFry'), t('meals_stuffedSweetPotatoes'),
+      t('meals_veggieBurritoBowl'), t('meals_shrimpFriedRice'), t('meals_zoodleStirFry'), 
+      t('meals_chickenPestoWrap'), t('meals_baconAndEggSandwich')
+  ];
 
-    // Middle row of recipes
-    const middleRecipes = [
-        t('meals_chickenAlfredo'), t('meals_tofuStirFry'), t('meals_beefAndBroccoli'), 
-        t('meals_tunaSalad'), t('meals_bbqChickenPizza'),
-        t('meals_eggFriedRice'), t('meals_bakedPotatoesCheese'), t('meals_chickpeaCurry'), 
-        t('meals_meatballSubs'), t('meals_shreddedChickenEnchiladas'),
-        t('meals_pastaBolognese'), t('meals_salmonTeriyaki'), t('meals_crispyTofuTacos'), 
-        t('meals_eggplantStirFry'), t('meals_stuffedSweetPotatoes'),
-        t('meals_veggieBurritoBowl'), t('meals_shrimpFriedRice'), t('meals_zoodleStirFry'), 
-        t('meals_chickenPestoWrap'), t('meals_baconAndEggSandwich'),
-        t('meals_garlicButterShrimp'), t('meals_frenchToast'), t('meals_huevosRancheros'), 
-        t('meals_sweetPotatoCurry'), t('meals_spinachRavioli'),
-        t('meals_tomYumSoup'), t('meals_spicyChickenRamen'), t('meals_kimchiStew'), 
-        t('meals_stuffedZucchiniBoats'), t('meals_turkeyClubSandwich'),
-        t('meals_tortillaEspanola'), t('meals_beefJerkyRiceBowl'), t('meals_chiliTofu'), 
-        t('meals_cucumberSandwiches'), t('meals_japaneseTamagoyaki'),
-        t('meals_blackBeanBurgers'), t('meals_katsuSando'), t('meals_eggCurry'), 
-        t('meals_fishTikka'), t('meals_bulgurWheatSalad'),
-        t('meals_vegetarianTacos'), t('meals_baconMacAndCheese'), t('meals_creamyMushroomPasta'), 
-        t('meals_chickenGyros'), t('meals_pitaWithHummus'),
-        t('meals_cranberryChickenSalad'), t('meals_pineappleFriedRice'), t('meals_mangoChickenWraps'), 
-        t('meals_lambRoganJosh'), t('meals_crabLinguine'),
-        t('meals_clamChowder'), t('meals_spinachAndFetaQuesadilla'), t('meals_potatoLeekSoup'), 
-        t('meals_roastBeefSandwich'), t('meals_avocadoChickenBowl'),
-        t('meals_sourdoughGrilledCheese'), t('meals_srirachaNoodles'), t('meals_kaleCaesarSalad'), 
-        t('meals_pestoZoodles'), t('meals_chiliMac'),
-        t('meals_shrimpLettuceWraps'), t('meals_chickenLettuceWraps'), t('meals_burrataSalad'), 
-        t('meals_panzanella'), t('meals_picoDeGalloChicken'),
-        t('meals_salmonCakes'), t('meals_yakisoba'), t('meals_porkBellyBuns'), 
-        t('meals_greenLentilSalad'), t('meals_veganPokeBowl'),
-        t('meals_creamyCauliflowerSoup'), t('meals_chickenNoodleSoup'), t('meals_broccoliCheddarSoup'), 
-        t('meals_shiitakeFriedRice'), t('meals_smashedChickpeaSalad'),
-        t('meals_veganShepherdsPie'), t('meals_bbqTempehWraps'), t('meals_orangeChicken'), 
-        t('meals_pineappleChicken'), t('meals_coconutShrimpCurry'),
-        t('meals_garlicNaanWithChole'), t('meals_mexicanRiceBowl'), t('meals_buffaloChickenSandwich'), 
-        t('meals_pestoChickenPizza'), t('meals_steamedBaoBuns'),
-        t('meals_thaiBasilChicken'), t('meals_cornbreadAndChili'), t('meals_cheesyBroccoliBake'), 
-        t('meals_beefKofta'), t('meals_roastedCauliflowerTacos'),
-        t('meals_mangoAvocadoSalad'), t('meals_lemonGarlicPasta'), t('meals_roastedVegetableFlatbread'), 
-        t('meals_chickenAvocadoSandwich'), t('meals_eggSaladSandwich'),
-        t('meals_cubanSandwich'), t('meals_shrimpGrits'), t('meals_pumpkinRisotto'), 
-        t('meals_lambMoussaka'), t('meals_italianSub')
-    ];
+  // Lower row of recipes - Third set of unique recipes
+  const lowerRecipes = [
+      t('meals_chickenTikkaMasala'), t('meals_pestoPasta'), t('meals_lambKebabs'), 
+      t('meals_shrimpScampi'), t('meals_caesarSalad'),
+      t('meals_vegetableLasagna'), t('meals_teriyakiSalmon'), t('meals_beefBurgers'), 
+      t('meals_padThai'), t('meals_mushroomWellington'),
+      t('meals_hotAndSourSoup'), t('meals_bakedEggplant'), t('meals_friedChickenSandwich'), 
+      t('meals_veggieSushi'), t('meals_sobaNoodlesWithVeggies'),
+      t('meals_misoRamen'), t('meals_gingerPork'), t('meals_sesameChicken'), 
+      t('meals_stuffedTomatoes'), t('meals_roastedBeetSalad')
+  ];
 
-    // Lower row of recipes (scrolls left to right)
-    const lowerRecipes = [
-        t('meals_chickenTikkaMasala'), t('meals_pestoPasta'), t('meals_lambKebabs'), 
-        t('meals_shrimpScampi'), t('meals_caesarSalad'),
-        t('meals_vegetableLasagna'), t('meals_teriyakiSalmon'), t('meals_beefBurgers'), 
-        t('meals_padThai'), t('meals_mushroomWellington'),
-        t('meals_hotAndSourSoup'), t('meals_bakedEggplant'), t('meals_friedChickenSandwich'), 
-        t('meals_veggieSushi'), t('meals_sobaNoodlesWithVeggies'),
-        t('meals_misoRamen'), t('meals_gingerPork'), t('meals_sesameChicken'), 
-        t('meals_stuffedTomatoes'), t('meals_roastedBeetSalad'),
-        t('meals_nicoiseSalad'), t('meals_beefCurry'), t('meals_salmonAvocadoRoll'), 
-        t('meals_tofuCurry'), t('meals_baconWrappedDates'),
-        t('meals_avocadoEggSalad'), t('meals_roastedTurkeyBreast'), t('meals_spaghettiAglioEOlio'), 
-        t('meals_veganMacAndCheese'), t('meals_sweetPotatoFries'),
-        t('meals_brusselsSproutsWithBacon'), t('meals_couscousSalad'), t('meals_lobsterBisque'), 
-        t('meals_trufflePasta'), t('meals_ricottaPancakes'),
-        t('meals_blueberryWaffles'), t('meals_grilledShrimpSkewers'), t('meals_spaghettiWithMeatballs'), 
-        t('meals_frenchCrepes'), t('meals_bbqRibs'),
-        t('meals_kaleAndQuinoaSalad'), t('meals_eggplantCaponata'), t('meals_cauliflowerSteak'), 
-        t('meals_sweetcornFritters'), t('meals_shrimpTacosWithSlaw'),
-        t('meals_crabFriedRice'), t('meals_garlicChickenThighs'), t('meals_lambSouvlaki'), 
-        t('meals_texMexBowl'), t('meals_baconFriedRice'),
-        t('meals_ovenBakedFalafel'), t('meals_smokedSalmonBagel'), t('meals_jerkChicken'), 
-        t('meals_tomatoBasilSoup'), t('meals_pineappleChickenRice'),
-        t('meals_stuffedPortobelloMushrooms'), t('meals_chickenYakisoba'), t('meals_ramenWithSoftBoiledEgg'), 
-        t('meals_moroccanCouscous'), t('meals_lemonDillChicken'),
-        t('meals_chimichurriSteak'), t('meals_chickenAndDumplings'), t('meals_searedScallops'), 
-        t('meals_italianWeddingSoup'), t('meals_spinachArtichokePasta'),
-        t('meals_spicyTunaRoll'), t('meals_mangoSalsaChicken'), t('meals_garlicParmesanWings'), 
-        t('meals_broccoliStirFry'), t('meals_cabbageRolls'),
-        t('meals_shreddedPorkTacos'), t('meals_fajitaBowl'), t('meals_pumpkinSoup'), 
-        t('meals_beefAndBeanBurritos'), t('meals_cornFritters'),
-        t('meals_vietnameseSpringRolls'), t('meals_chickenPestoPasta'), t('meals_steamedMussels'), 
-        t('meals_roastedChickpeas'), t('meals_koreanFriedChicken'),
-        t('meals_porkGyoza'), t('meals_miniQuiches'), t('meals_thaiLarb'), 
-        t('meals_shrimpToast'), t('meals_avocadoCornSalad'),
-        t('meals_veggieStirFryNoodles'), t('meals_brieAndAppleSandwich'), t('meals_savoryCrepes'), 
-        t('meals_duckConfit'), t('meals_gheeRoastChicken'),
-        t('meals_paprikaChicken'), t('meals_okraAndTomatoes'), t('meals_smokedBrisket'), 
-        t('meals_szechuanTofu'), t('meals_beefTeriyaki'),
-        t('meals_pineappleSalsaFish'), t('meals_creamedSpinach'), t('meals_tunaMelt'), 
-        t('meals_artichokePizza'), t('meals_garlicRoastedPotatoes')
-    ];
-
-    // Memoize the filtered recipes to prevent unnecessary recalculations
-    const { filteredUpperRecipes, filteredMiddleRecipes, filteredLowerRecipes } = useMemo(() => {
-        const allRecipes = [...upperRecipes, ...middleRecipes, ...lowerRecipes].filter(recipe => recipe && typeof recipe === 'string');
-        const filteredRecipes = allRecipes.filter(recipe => 
-            recipe.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        
-        // Ensure we have enough items for smooth scrolling by duplicating the filtered results
-        const duplicatedFilteredRecipes = [...filteredRecipes, ...filteredRecipes];
-        
-        return {
-            filteredUpperRecipes: duplicatedFilteredRecipes.filter((_, index) => index % 35 === 0),
-            filteredMiddleRecipes: duplicatedFilteredRecipes.filter((_, index) => index % 35 === 0),
-            filteredLowerRecipes: duplicatedFilteredRecipes.filter((_, index) => index % 35 === 1)
-        };
-    }, [searchQuery, upperRecipes, middleRecipes, lowerRecipes, language]);
-
-    const fetchMealRecipe = async (mealName: string) => {
-        setLoading(true);
-        setSelectedMeal(mealName);
-        setMealResponse(null);
-        setError(null);
-
-        try {
-            // Get the original meal name by removing the 'meals_' prefix
-            const originalMealName = mealName.replace('meals_', '');
-            console.log('Sending meal name to API:', originalMealName);
-            
-            const response = await axios.post(`${API_BASE_URL}/get-recipe`, { meal: originalMealName });
-            console.log('API Response:', response.data);
-            
-            // Log the state before update
-            console.log('Current mealResponse state:', mealResponse);
-            
-            setMealResponse(response.data);
-            
-            // Log after state update (will show in next render)
-            console.log('Updated mealResponse state:', response.data);
-        } catch (error) {
-            console.error("Error fetching meal recipe:", error);
-            if (axios.isAxiosError(error)) {
-                console.error("Error details:", error.response?.data);
-                
-                // Check if it's a rate limit error
-                if (error.response?.data?.details?.includes('UserByModelByDay')) {
-                    setError(t('aiRateLimitError') || 'The AI service is currently busy. Please try again in a few minutes.');
-                } else {
-                    setError(t('errorFetchingRecipe') || 'Error fetching recipe. Please try again.');
-                }
-            } else {
-                setError(t('errorFetchingRecipe') || 'Error fetching recipe. Please try again.');
-            }
-        } finally {
-            setLoading(false);
-        }
+  // Filtered recipes logic with unique meals per row
+  const { filteredUpperRecipes, filteredMiddleRecipes, filteredLowerRecipes } = useMemo(() => {
+    // If there's a search query, filter each row separately
+    if (searchQuery) {
+      const filteredUpper = upperRecipes.filter(recipe => 
+        recipe && typeof recipe === 'string' && 
+        recipe.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      
+      const filteredMiddle = middleRecipes.filter(recipe => 
+        recipe && typeof recipe === 'string' && 
+        recipe.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      
+      const filteredLower = lowerRecipes.filter(recipe => 
+        recipe && typeof recipe === 'string' && 
+        recipe.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      
+      // Duplicate each row's filtered results for animation
+      return {
+        filteredUpperRecipes: [...filteredUpper, ...filteredUpper],
+        filteredMiddleRecipes: [...filteredMiddle, ...filteredMiddle],
+        filteredLowerRecipes: [...filteredLower, ...filteredLower],
+      };
+    }
+    
+    // If no search query, use the full sets of unique meals
+    return {
+      filteredUpperRecipes: [...upperRecipes, ...upperRecipes],
+      filteredMiddleRecipes: [...middleRecipes, ...middleRecipes],
+      filteredLowerRecipes: [...lowerRecipes, ...lowerRecipes],
     };
+  }, [searchQuery, upperRecipes, middleRecipes, lowerRecipes, language]);
 
-    const refineRecipe = async () => {
-        if (!mealResponse) return;
+  // Function to capture the current position of a carousel
+  const captureCarouselPosition = (rowType: string, event: React.MouseEvent) => {
+    // Get the element that was clicked
+    const target = event.currentTarget as HTMLElement;
+    
+    // Get the carousel container (parent element)
+    const carouselContainer = target.parentElement;
+    
+    if (carouselContainer) {
+      // Get computed style to capture current transform
+      const style = window.getComputedStyle(carouselContainer);
+      const transform = style.getPropertyValue('transform');
+      
+      // Store the transform based on row type
+      if (rowType === 'upper') {
+        setUpperRowTransform(transform);
+      } else if (rowType === 'middle') {
+        setMiddleRowTransform(transform);
+      } else if (rowType === 'lower') {
+        setLowerRowTransform(transform);
+      }
+    }
+  };
 
-        setRefiningLoading(true);
-        
-        try {
-            const response = await axios.post(`${API_BASE_URL}/refine-recipe`, {
-                meal: selectedMeal,
-                issue: userInput,
-            });
+  const fetchMealRecipe = async (mealName: string, rowType: string, event: React.MouseEvent) => {
+    // Capture position first
+    captureCarouselPosition(rowType, event);
+    
+    setLoading(true);
+    setSelectedMeal(mealName);
+    setMealResponse(null);
+    setError(null);
+    setActiveRow(rowType);
 
-            setMealResponse(response.data);
-            setUserInput(""); // Clear input after sending request
-        } catch (error) {
-            console.error("Error refining recipe:", error);
-        } finally {
-            setRefiningLoading(false);
+    try {
+      const originalMealName = mealName.replace("meals_", "");
+      console.log("Sending meal name to API:", originalMealName);
+      const response = await axios.post(`${API_BASE_URL}/get-recipe`, { meal: originalMealName });
+      console.log("API Response:", response.data);
+      setMealResponse(response.data);
+    } catch (err) {
+      console.error("Error fetching meal recipe:", err);
+      if (axios.isAxiosError(err)) {
+        if (err.response?.data?.details?.includes("UserByModelByDay")) {
+          setError(t("aiRateLimitError") || "AI is busy. Please try again later.");
+        } else {
+          setError(t("errorFetchingRecipe") || "Error fetching recipe. Please try again.");
         }
-    };
+      } else {
+        setError(t("errorFetchingRecipe") || "Error fetching recipe. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="meal-selection-container">
-            <div className="meal-selection-header">
-                <h2>{t('chooseAMeal')}</h2>
-                <p className="subtitle">{t('popularMeals')}</p>
-                <div className="search-container">
-                    <input
-                        type="text"
-                        placeholder={t('searchMeals')}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="search-input"
-                    />
-                </div>
-            </div>
+  const refineRecipe = async () => {
+    if (!mealResponse) return;
+    setRefiningLoading(true);
 
-            <div className="recipe-carousel-container">
-                <div className="recipe-carousel upper-carousel">
-                    <div className="carousel-inner">
-                        {filteredUpperRecipes.map((meal, index) => (
-                            <button 
-                                key={`upper-${index}`} 
-                                onClick={() => fetchMealRecipe(meal)}
-                                className={`meal-option-btn ${selectedMeal === meal ? 'active' : ''}`}
-                            >
-                                {meal}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+    try {
+      const response = await axios.post(`${API_BASE_URL}/refine-recipe`, {
+        meal: selectedMeal,
+        issue: userInput,
+      });
+      setMealResponse(response.data);
+      setUserInput("");
+    } catch (error) {
+      console.error("Error refining recipe:", error);
+    } finally {
+      setRefiningLoading(false);
+    }
+  };
 
-                <div className="recipe-carousel middle-carousel">
-                    <div className="carousel-inner">
-                        {filteredMiddleRecipes.map((meal, index) => (
-                            <button 
-                                key={`middle-${index}`} 
-                                onClick={() => fetchMealRecipe(meal)}
-                                className={`meal-option-btn ${selectedMeal === meal ? 'active' : ''}`}
-                            >
-                                {meal}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+  // Mouse event handlers for hovering
+  const handleMouseEnter = (rowType: string) => {
+    setHoverRow(rowType);
+  };
+  
+  const handleMouseLeave = () => {
+    setHoverRow(null);
+  };
 
-                <div className="recipe-carousel lower-carousel">
-                    <div className="carousel-inner">
-                        {filteredLowerRecipes.map((meal, index) => (
-                            <button 
-                                key={`lower-${index}`} 
-                                onClick={() => fetchMealRecipe(meal)}
-                                className={`meal-option-btn ${selectedMeal === meal ? 'active' : ''}`}
-                            >
-                                {meal}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {loading && (
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <p>{t('loading')}</p>
-                </div>
-            )}
-
-            {error && (
-                <div className="error-container">
-                    <p className="error-message">{error}</p>
-                </div>
-            )}
-
-            {mealResponse && (
-                <div className="recipe-details" style={{ display: 'block' }}>
-                    <h3 className="recipe-title">{mealResponse.meal}</h3>
-                    
-                    <div className="recipe-content">
-                        <div className="ingredients-section">
-                            <h4>{t('ingredients')}</h4>
-                            <ul className="ingredients-list">
-                                {Array.isArray(mealResponse.ingredients) ? (
-                                    mealResponse.ingredients.map((ingredient, index) => (
-                                        <li key={index}>{ingredient}</li>
-                                    ))
-                                ) : (
-                                    <li>{t('noIngredients')}</li>
-                                )}
-                            </ul>
-                        </div>
-                        
-                        <div className="instructions-section">
-                            <h4>{t('instructions')}</h4>
-                            <div className="instructions-text">
-                                {mealResponse.instructions || t('noInstructions')}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="recipe-refinement">
-                        <h4>{t('needAdjustments')}</h4>
-                        <div className="refinement-input-group">
-                            <input
-                                type="text"
-                                placeholder={t('refinementPlaceholder')}
-                                value={userInput}
-                                onChange={(e) => setUserInput(e.target.value)}
-                                className="refinement-input"
-                                disabled={refiningLoading}
-                            />
-                            {!refiningLoading ? (
-                                <button 
-                                    onClick={refineRecipe} 
-                                    disabled={!userInput} 
-                                    className="refinement-button"
-                                >
-                                    {t('askAI')}
-                                </button>
-                            ) : (
-                                <button className="refinement-button" disabled>
-                                    {t('aiThinking')}
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
+  return (
+    <div
+      style={{
+        maxWidth: "1000px",
+        margin: "0 auto",
+        padding: "2rem",
+        backgroundColor: "#fff",
+        borderRadius: "12px",
+        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+      }}
+    >
+      <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+        <h2 style={{ fontSize: "2.2rem", color: "#2c3e50", marginBottom: "0.5rem" }}>
+          {t("chooseAMeal")}
+        </h2>
+        <p style={{ color: "#7f8c8d", fontSize: "1.1rem", marginTop: 0 }}>
+          {t("popularMeals")}
+        </p>
+        <div style={{ margin: "20px 0", width: "100%", maxWidth: "500px", marginLeft: "auto", marginRight: "auto", position: "relative", display: "flex", justifyContent: "center" }}>
+          <input
+            type="text"
+            placeholder={t("searchMeals")}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px 20px",
+              border: "2px solid #e0e0e0",
+              borderRadius: "25px",
+              fontSize: "16px",
+              outline: "none",
+              transition: "all 0.3s ease",
+              backgroundColor: "#ffffff",
+              color: "#333",
+              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+            }}
+          />
         </div>
-    );
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", overflow: "hidden", position: "relative" }}>
+        {/* Upper carousel */}
+        <div 
+          style={{ width: "100%", margin: "0 auto", overflow: "hidden", position: "relative" }}
+          onMouseEnter={() => handleMouseEnter('upper')}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div 
+            style={{ 
+              display: "flex", 
+              gap: "15px", 
+              padding: "10px 0", 
+              width: "fit-content", 
+              margin: "0 auto",
+              animation: activeRow === 'upper' ? 'none' : 'scrollRightToLeft 120s linear infinite',
+              animationPlayState: hoverRow === 'upper' ? 'paused' : 'running',
+              transform: activeRow === 'upper' ? upperRowTransform : ''
+            }}
+          >
+            {filteredUpperRecipes.map((meal, index) => (
+              <button
+                key={`upper-${index}`}
+                onClick={(e) => fetchMealRecipe(meal, 'upper', e)}
+                style={{
+                  backgroundColor: selectedMeal === meal ? '#4CAF50' : '#f8f9fa',
+                  color: selectedMeal === meal ? 'white' : '#333',
+                  fontWeight: 500,
+                  padding: "0.8rem 1.5rem",
+                  borderRadius: "30px",
+                  border: `2px solid ${selectedMeal === meal ? '#4CAF50' : '#e9ecef'}`,
+                  transition: "all 0.3s ease",
+                  fontSize: "1rem",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                  cursor: "pointer",
+                }}
+              >
+                {meal}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Middle carousel */}
+        <div 
+          style={{ width: "100%", margin: "0 auto", overflow: "hidden", position: "relative" }}
+          onMouseEnter={() => handleMouseEnter('middle')}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div 
+            style={{ 
+              display: "flex", 
+              gap: "15px", 
+              padding: "10px 0", 
+              width: "fit-content", 
+              margin: "0 auto",
+              animation: activeRow === 'middle' ? 'none' : 'scrollLeftToRight 120s linear infinite',
+              animationPlayState: hoverRow === 'middle' ? 'paused' : 'running',
+              transform: activeRow === 'middle' ? middleRowTransform : ''
+            }}
+          >
+            {filteredMiddleRecipes.map((meal, index) => (
+              <button
+                key={`middle-${index}`}
+                onClick={(e) => fetchMealRecipe(meal, 'middle', e)}
+                style={{
+                  backgroundColor: selectedMeal === meal ? '#4CAF50' : '#f8f9fa',
+                  color: selectedMeal === meal ? 'white' : '#333',
+                  fontWeight: 500,
+                  padding: "0.8rem 1.5rem",
+                  borderRadius: "30px",
+                  border: `2px solid ${selectedMeal === meal ? '#4CAF50' : '#e9ecef'}`,
+                  transition: "all 0.3s ease",
+                  fontSize: "1rem",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                  cursor: "pointer",
+                }}
+              >
+                {meal}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Lower carousel */}
+        <div 
+          style={{ width: "100%", margin: "0 auto", overflow: "hidden", position: "relative" }}
+          onMouseEnter={() => handleMouseEnter('lower')}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div 
+            style={{ 
+              display: "flex", 
+              gap: "15px", 
+              padding: "10px 0", 
+              width: "fit-content", 
+              margin: "0 auto",
+              animation: activeRow === 'lower' ? 'none' : 'scrollRightToLeft 120s linear infinite',
+              animationPlayState: hoverRow === 'lower' ? 'paused' : 'running',
+              transform: activeRow === 'lower' ? lowerRowTransform : ''
+            }}
+          >
+            {filteredLowerRecipes.map((meal, index) => (
+              <button
+                key={`lower-${index}`}
+                onClick={(e) => fetchMealRecipe(meal, 'lower', e)}
+                style={{
+                  backgroundColor: selectedMeal === meal ? '#4CAF50' : '#f8f9fa',
+                  color: selectedMeal === meal ? 'white' : '#333',
+                  fontWeight: 500,
+                  padding: "0.8rem 1.5rem",
+                  borderRadius: "30px",
+                  border: `2px solid ${selectedMeal === meal ? '#4CAF50' : '#e9ecef'}`,
+                  transition: "all 0.3s ease",
+                  fontSize: "1rem",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                  cursor: "pointer",
+                }}
+              >
+                {meal}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {loading && (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "2rem", color: "#666" }}>
+          <div
+            style={{
+              width: "40px",
+              height: "40px",
+              border: "4px solid rgba(0, 0, 0, 0.1)",
+              borderLeftColor: "#4CAF50",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+              marginBottom: "1rem",
+            }}
+          />
+          <p>{t("loading")}</p>
+        </div>
+      )}
+
+      {error && (
+        <div style={{ margin: "2rem auto", padding: "1rem", backgroundColor: "#fff3f3", border: "1px solid #ffcdd2", borderRadius: "8px", maxWidth: "600px", textAlign: "center" }}>
+          <p style={{ color: "#d32f2f", fontSize: "1.1rem", margin: 0 }}>{error}</p>
+        </div>
+      )}
+
+      {mealResponse && (
+        <div
+          style={{
+            marginTop: "1.5rem",
+            backgroundColor: "#f9f9f9",
+            borderRadius: "12px",
+            padding: "1.5rem",
+            boxShadow: "inset 0 2px 8px rgba(0, 0, 0, 0.05)",
+          }}
+        >
+          <h3
+            style={{
+              textAlign: "center",
+              fontSize: "1.8rem",
+              color: "#2c3e50",
+              marginBottom: "1.5rem",
+              paddingBottom: "0.8rem",
+              borderBottom: "2px solid #e0e0e0",
+            }}
+          >
+            {mealResponse.meal}
+          </h3>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "2rem" }}>
+            {/* Ingredients */}
+            <div
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: "8px",
+                padding: "1.5rem",
+                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
+              }}
+            >
+              <h4 style={{ color: "#2c3e50", marginTop: 0, paddingBottom: "0.5rem", borderBottom: "1px solid #e0e0e0", fontSize: "1.3rem" }}>
+                {t("ingredients")}
+              </h4>
+              <ul style={{ paddingLeft: "1.5rem", color: "#555", marginTop: "1rem" }}>
+                {Array.isArray(mealResponse.ingredients) ? (
+                  mealResponse.ingredients.map((ingredient, idx) => (
+                    <li key={idx} style={{ marginBottom: "0.5rem" }}>
+                      {ingredient}
+                    </li>
+                  ))
+                ) : (
+                  <li>{t("noIngredients")}</li>
+                )}
+              </ul>
+            </div>
+
+            {/* Instructions */}
+            <div
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: "8px",
+                padding: "1.5rem",
+                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
+              }}
+            >
+              <h4 style={{ color: "#2c3e50", marginTop: 0, paddingBottom: "0.5rem", borderBottom: "1px solid #e0e0e0", fontSize: "1.3rem" }}>
+                {t("instructions")}
+              </h4>
+              <div
+                style={{
+                  color: "#555",
+                  lineHeight: 1.6,
+                  whiteSpace: "pre-line",
+                  padding: "1rem",
+                  marginTop: "1rem",
+                  backgroundColor: "#f9fafb",
+                  borderRadius: "6px",
+                }}
+              >
+                {mealResponse.instructions || t("noInstructions")}
+              </div>
+            </div>
+          </div>
+
+          {/* Refinement */}
+          <div
+            style={{
+              marginTop: "2rem",
+              backgroundColor: "#fff",
+              borderRadius: "8px",
+              padding: "1.5rem",
+              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
+            }}
+          >
+            <h4 style={{ color: "#2c3e50", marginTop: 0, marginBottom: "1rem" }}>
+              {t("needAdjustments")}
+            </h4>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <input
+                type="text"
+                placeholder={t("refinementPlaceholder")}
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "0.8rem 1rem",
+                  border: "1px solid #ddd",
+                  borderRadius: "6px",
+                  fontSize: "1rem",
+                  color: "#333",
+                  backgroundColor: "#fff",
+                }}
+                disabled={refiningLoading}
+              />
+              {!refiningLoading ? (
+                <button
+                  onClick={refineRecipe}
+                  disabled={!userInput}
+                  style={{
+                    padding: "0.8rem 1.5rem",
+                    backgroundColor: "#4CAF50",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontWeight: 500,
+                    transition: "all 0.2s ease",
+                    minWidth: "100px",
+                    cursor: !userInput ? "not-allowed" : "pointer",
+                    opacity: !userInput ? 0.7 : 1,
+                  }}
+                >
+                  {t("askAI")}
+                </button>
+              ) : (
+                <button
+                  style={{
+                    padding: "0.8rem 1.5rem",
+                    backgroundColor: "#cccccc",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontWeight: 500,
+                    minWidth: "100px",
+                  }}
+                  disabled
+                >
+                  {t("aiThinking")}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default MealSelection;
