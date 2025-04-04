@@ -1,4 +1,26 @@
 /* MealSelection.css */
+@keyframes scrollRightToLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scrollLeftToRight {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .meal-selection-container {
   max-width: 1000px;
   margin: 0 auto;
@@ -25,7 +47,35 @@
   margin-top: 0;
 }
 
-/* Recipe Carousel Styles */
+.search-container {
+  margin: 20px 0;
+  width: 100%;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.search-input:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
 .recipe-carousel-container {
   display: flex;
   flex-direction: column;
@@ -37,52 +87,9 @@
 
 .recipe-carousel {
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
   overflow: hidden;
   position: relative;
-}
-
-.carousel-inner {
-  display: flex;
-  gap: 15px;
-  padding: 10px 0;
-  width: fit-content;
-  margin: 0 auto;
-}
-
-.upper-carousel .carousel-inner {
-  animation: scrollRightToLeft 30s linear infinite;
-}
-
-.middle-carousel .carousel-inner {
-  animation: scrollLeftToRight 30s linear infinite;
-}
-
-.lower-carousel .carousel-inner {
-  animation: scrollRightToLeft 30s linear infinite;
-}
-
-@keyframes scrollRightToLeft {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes scrollLeftToRight {
-  0% {
-    transform: translateX(-50%);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-
-.carousel-inner:hover {
-  animation-play-state: paused;
 }
 
 .recipe-carousel::before,
@@ -106,7 +113,6 @@
   background: linear-gradient(to left, var(--color-background), rgba(255, 255, 255, 0));
 }
 
-/* Button styles */
 .meal-option-btn {
   background-color: var(--color-button-bg);
   color: var(--color-text);
@@ -118,6 +124,7 @@
   font-size: 1rem;
   white-space: nowrap;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .meal-option-btn:hover {
@@ -150,8 +157,20 @@
   margin-bottom: 1rem;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.error-container {
+  margin: 2rem auto;
+  padding: 1rem;
+  background-color: #fff3f3;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  max-width: 600px;
+  text-align: center;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 1.1rem;
+  margin: 0;
 }
 
 .recipe-details {
@@ -211,6 +230,10 @@
   color: var(--color-text-secondary);
   line-height: 1.6;
   white-space: pre-line;
+  padding: 1rem;
+  margin-top: 1rem;
+  background-color: #f9fafb;
+  border-radius: 6px;
 }
 
 .recipe-refinement {
@@ -232,6 +255,13 @@
   gap: 10px;
 }
 
+.refinement-input {
+  flex: 1;
+  padding: 0.8
+
+}
+
+/* MealSelection.css (continued) */
 .refinement-input {
   flex: 1;
   padding: 0.8rem 1rem;
@@ -263,6 +293,7 @@
   font-weight: 500;
   transition: all 0.2s ease;
   min-width: 100px;
+  cursor: pointer;
 }
 
 .refinement-button:hover:not(:disabled) {
@@ -346,10 +377,6 @@
 @media (max-width: 480px) {
   .refinement-input-group {
     flex-direction: column;
-  }
-  
-  .carousel-inner {
-    animation-duration: 20s;
   }
   
   .meal-option-btn {
