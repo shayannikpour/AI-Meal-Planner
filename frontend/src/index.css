@@ -4,21 +4,20 @@
   font-weight: 400;
 
   /* Light theme variables */
-  --color-text: #213547;
-  --color-background: #f5f7fa;
-  --color-background-gradient: linear-gradient(135deg, #f5f7fa 0%, #f8f9fa 100%);
-  --color-border: rgba(230, 230, 230, 0.8);
-  --color-button-bg: #f8f9fa;
-  --color-button-hover: #e9ecef;
+  --color-text: #333333;
+  --color-text-secondary: #666666;
+  --color-background: #ffffff;
+  --color-border: #e0e0e0;
+  --color-button-bg: #ffffff;
+  --color-button-hover: #f5f5f5;
   --color-button-border-hover: #dee2e6;
   --color-primary: #4CAF50;
   --color-primary-dark: #3e8e41;
   --color-primary-light: rgba(76, 175, 80, 0.2);
   --color-focus-outline: rgba(76, 175, 80, 0.5);
-  --color-card-shadow: rgba(0, 0, 0, 0.05);
-  --color-card-shadow-hover: rgba(0, 0, 0, 0.1);
-  --color-text-secondary: #555;
-  --color-header-gradient: linear-gradient(90deg, #4CAF50, #2196F3);
+  --color-card-shadow: rgba(0, 0, 0, 0.1);
+  --color-card-shadow-hover: rgba(0, 0, 0, 0.15);
+  --color-header-gradient: linear-gradient(45deg, #4CAF50, #2196F3);
   --color-input-border: #ddd;
 
   color-scheme: light dark;
@@ -34,20 +33,19 @@
 /* Dark theme variables */
 [data-theme="dark"] {
   --color-text: #e6e6e6;
+  --color-text-secondary: #aaaaaa;
   --color-background: #1a1a1a;
-  --color-background-gradient: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
   --color-border: rgba(80, 80, 80, 0.8);
   --color-button-bg: #333333;
-  --color-button-hover: #444444;
+  --color-button-hover: #404040;
   --color-button-border-hover: #555555;
   --color-primary: #6abf6e;
   --color-primary-dark: #5a9f5e;
   --color-primary-light: rgba(106, 191, 110, 0.2);
   --color-focus-outline: rgba(106, 191, 110, 0.5);
-  --color-card-shadow: rgba(0, 0, 0, 0.2);
-  --color-card-shadow-hover: rgba(0, 0, 0, 0.3);
-  --color-text-secondary: #aaa;
-  --color-header-gradient: linear-gradient(90deg, #6abf6e, #64b5f6);
+  --color-card-shadow: rgba(0, 0, 0, 0.3);
+  --color-card-shadow-hover: rgba(0, 0, 0, 0.4);
+  --color-header-gradient: linear-gradient(45deg, #6abf6e, #64b5f6);
   --color-input-border: #444;
 }
 
@@ -74,6 +72,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: var(--color-background-gradient);
+  font-family: 'Inter', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 h1 {
@@ -143,3 +142,9 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* Remove old prefers-color-scheme media query as we're using our own theme toggle now */
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
