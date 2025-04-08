@@ -239,126 +239,24 @@ const IngredientSelector: React.FC = () => {
                 </div>
             )}
 
-            {/* Recipe Display Section */}
             {mealResponse && (
-                <div style={{
-                    marginTop: "2rem",
-                    backgroundColor: "white",
-                    borderRadius: "8px",
-                    padding: "2rem",
-                    width: "100%"
-                }}>
-                    <h2 style={{
-                        textAlign: "left",
-                        fontSize: "1.5rem",
-                        color: "#333",
-                        marginBottom: "1.5rem",
-                        fontWeight: "500",
-                        borderBottom: "1px solid #eee",
-                        paddingBottom: "0.5rem"
-                    }}>
-                        {mealResponse.meal}
-                    </h2>
-
-                    <div style={{
-                        display: "grid",
-                        gridTemplateColumns: "250px 1fr",
-                        gap: "2rem",
-                        alignItems: "start"
-                    }}>
-                        {/* Ingredients Section */}
-                        <div style={{
-                            // backgroundColor: '#f8f9fa',
-                            padding: '1.5rem',
-                            borderRadius: '8px',
-                            border: '1px solid #eee'
-                        }}>
-                            <h3 style={{
-                                color: "#333",
-                                fontSize: "1rem",
-                                marginBottom: "1rem",
-                                fontWeight: "500"
-                            }}>
-                                Ingredients
-                            </h3>
-                            <ul style={{
-                                listStyle: "disc",
-                                paddingLeft: "1.2rem",
-                                margin: 0,
-                                color: "#666"
-                            }}>
-                                {Array.isArray(mealResponse.ingredients) ? (
-                                    mealResponse.ingredients.map((ingredient, idx) => (
-                                        <li key={idx} style={{
-                                            marginBottom: "0.5rem",
-                                            lineHeight: "1.4",
-                                            fontSize: "0.9rem"
-                                        }}>
-                                            {ingredient}
-                                        </li>
-                                    ))
-                                ) : (
-                                    <li>{t("noIngredients")}</li>
-                                )}
+                <div className="recipe-container">
+                    <h1 className="recipe-title">{mealResponse.meal}</h1>
+                    
+                    <div className="recipe-content">
+                        <div className="recipe-section">
+                            <h2>{t('ingredients')}</h2>
+                            <ul className="ingredients-list">
+                                {mealResponse.ingredients.map((ingredient: string, idx: number) => (
+                                    <li key={idx}>{ingredient}</li>
+                                ))}
                             </ul>
                         </div>
-
-                        {/* Instructions Section */}
-                        <div style={{
-                            // backgroundColor: '#f8f9fa',
-                            padding: '1.5rem',
-                            borderRadius: '8px',
-                            border: '1px solid #eee'
-                        }}>
-                            <h3 style={{
-                                color: "#333",
-                                fontSize: "1rem",
-                                marginBottom: "1rem",
-                                fontWeight: "500"
-                            }}>
-                                Instructions
-                            </h3>
-                            <div style={{
-                                color: "#666"
-                            }}>
-                                {mealResponse.instructions.split('\n').map((step, idx) => {
-                                    const stepMatch = step.trim().match(/^(?:Step\s+)?(\d+)[.:]\s*(.+)$/i);
-                                    
-                                    if (stepMatch) {
-                                        const [_, stepNum, stepContent] = stepMatch;
-                                        return (
-                                            <div key={idx} style={{
-                                                marginBottom: "1rem"
-                                            }}>
-                                                <div style={{
-                                                    fontWeight: "bold",
-                                                    marginBottom: "0.5rem",
-                                                    fontSize: "1rem",
-                                                    color: "#000"
-                                                }}>
-                                                    Step {stepNum}
-                                                </div>
-                                                <div style={{
-                                                    fontSize: "0.9rem",
-                                                    color: "#333",
-                                                    lineHeight: "1.4"
-                                                }}>
-                                                    {stepContent}
-                                                </div>
-                                            </div>
-                                        );
-                                    }
-                                    
-                                    return (
-                                        <p key={idx} style={{
-                                            marginBottom: "0.75rem",
-                                            lineHeight: "1.4",
-                                            fontSize: "0.9rem"
-                                        }}>
-                                            {step.trim()}
-                                        </p>
-                                    );
-                                })}
+                        
+                        <div className="recipe-section">
+                            <h2>{t('instructions')}</h2>
+                            <div className="instructions-text">
+                                {mealResponse.instructions}
                             </div>
                         </div>
                     </div>

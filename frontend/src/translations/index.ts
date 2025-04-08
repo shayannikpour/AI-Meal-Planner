@@ -13,6 +13,7 @@ interface Translations {
         chooseAMeal: string;
         back: string;
         favorites: string;
+        favoritesDescription: string;
         addToFavorites: string;
         noFavorites: string;
         teamMembers: string;
@@ -383,6 +384,7 @@ const translations: Translations = {
         chooseAMeal: 'Choose a Meal',
         back: '← Back to Main Menu',
         favorites: 'Favorites',
+        favoritesDescription: 'Your saved favorite recipes',
         addToFavorites: 'Add to Favorites',
         noFavorites: 'No favorite meals yet. Add some from the meal selection page!',
         teamMembers: 'Team Members: Shayan, Mitchell, Eddie, Jaskunwar',
@@ -750,6 +752,7 @@ const translations: Translations = {
         chooseAMeal: 'Elegir una comida',
         back: '← Volver al menú principal',
         favorites: 'Favoritos',
+        favoritesDescription: 'Tus recetas favoritas guardadas',
         addToFavorites: 'Añadir a Favoritos',
         noFavorites: '¡Aún no hay comidas favoritas. ¡Añade algunas desde la página de selección de comidas!',
         teamMembers: 'Miembros del equipo: Shayan, Mitchell, Eddie, Jaskunwar',
@@ -1021,7 +1024,7 @@ const translations: Translations = {
         meals_mushroomWellington: 'Filete de Lomo Horneado',
         meals_hotAndSourSoup: 'Sopa Picante',
         meals_bakedEggplant: 'Berenjena Horneada',
-        meals_friedChickenSandwich: 'Sandwich de Pollo Frito',
+        meals_friedChickenSandwich: 'Sandwich de Poulet Frit',
         meals_veggieSushi: 'Sushi Vegetariano',
         meals_sobaNoodlesWithVeggies: 'Soba Noodles con Verduras',
         meals_misoRamen: 'Ramen Miso',
@@ -1039,11 +1042,11 @@ const translations: Translations = {
         meals_spaghettiAglioEOlio: 'Spaghetti Aglio e Olio',
         meals_veganMacAndCheese: 'Mac y Queso Vegano',
         meals_sweetPotatoFries: 'Patatas de Papa Dulce',
-        meals_brusselsSproutsWithBacon: 'Brusselas con Panceta',
-        meals_couscousSalad: 'Ensalada de Couscous',
+        meals_brusselsSproutsWithBacon: 'Chou-de-Bruxelles avec Pancette',
+        meals_couscousSalad: 'Salade de Couscous',
         meals_lobsterBisque: 'Cazuela de Langosta',
         meals_trufflePasta: 'Pasta con Trufa',
-        meals_ricottaPancakes: 'Panqueques de Ricotta',
+        meals_ricottaPancakes: 'Pancakes de Ricotta',
         meals_blueberryWaffles: 'Waffles aux Framboises',
         meals_grilledShrimpSkewers: 'Brochetas de Camarón',
         meals_spaghettiWithMeatballs: 'Spaghetti con Bolas de Carne',
@@ -1117,6 +1120,7 @@ const translations: Translations = {
         chooseAMeal: 'Choisir un repas',
         back: '← Retour au menu principal',
         favorites: 'Favoris',
+        favoritesDescription: 'Vos recettes favorites enregistrées',
         addToFavorites: 'Ajouter aux favoris',
         noFavorites: 'Aucun repas encore en favoris. Ajoutez-en depuis la page de sélection de repas !',
         teamMembers: 'Membres de l\'équipe : Shayan, Mitchell, Eddie, Jaskunwar',
@@ -1412,7 +1416,7 @@ const translations: Translations = {
         meals_trufflePasta: 'Pâte à la Truffe',
         meals_ricottaPancakes: 'Pancakes de Ricotta',
         meals_blueberryWaffles: 'Waffles aux Framboises',
-        meals_grilledShrimpSkewers: 'Brochettes de Crevette',
+        meals_grilledShrimpSkewers: 'Brochettes de Camarón',
         meals_spaghettiWithMeatballs: 'Spaghetti avec des Boules de Viande',
         meals_frenchCrepes: 'Crepes Françaises',
         meals_bbqRibs: 'Ribs BBQ',
@@ -1484,6 +1488,7 @@ const translations: Translations = {
         chooseAMeal: '选择餐点',
         back: '← 返回主菜单',
         favorites: '收藏夹',
+        favoritesDescription: '您保存的喜欢的食谱',
         addToFavorites: '添加到收藏夹',
         noFavorites: '还没有喜欢的餐点。从餐点选择页面添加一些吧！',
         teamMembers: '团队成员：Shayan, Mitchell, Eddie, Jaskunwar',

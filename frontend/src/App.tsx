@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import LanguageSelector from './components/LanguageSelector';
 import MealSelection from './components/MealSelection';
@@ -7,6 +7,7 @@ import Navigation from './components/Navigation';
 import translations from './translations';
 import './App.css';
 import Favorites from './components/Favorites';
+import ThemeToggle from './components/ThemeToggle';
 
 interface LanguageContextType {
   language: string;
@@ -31,80 +32,77 @@ export const ThemeContext = createContext<ThemeContextType>({
 });
 
 const Header = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { theme, toggleTheme } = React.useContext(ThemeContext);
-  const { t } = React.useContext(LanguageContext);
+  const location = useLocation();
+  const { t } = useContext(LanguageContext);
 
   return (
-    <div className="app-top-bar">
-      <div style={{ 
-        width: '100px', 
-        display: 'flex', 
-        alignItems: 'center',
-        gap: '0.5rem'
-      }}>
-        <button 
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '1rem',
+      position: 'relative'
+    }}>
+      {/* Left section */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100px' }}>
+        <button
           onClick={() => navigate(-1)}
           style={{
-            backgroundColor: 'transparent',
+            background: 'none',
             border: 'none',
             cursor: 'pointer',
-            padding: '0.5rem',
+            fontSize: '24px',
+            color: 'var(--color-text)',
+            padding: '8px',
             display: 'flex',
             alignItems: 'center',
-            color: 'var(--color-text)',
-            fontSize: '1rem'
+            justifyContent: 'center'
           }}
+          aria-label="Back to previous page"
         >
-          ← {t('back')}
+          ←
         </button>
-        <button 
-          className="theme-toggle-btn" 
-          onClick={toggleTheme}
-          aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-          style={{
-            marginLeft: 'auto'
-          }}
-        >
-          {theme === 'light' ? '🌙' : '☀️'}
-        </button>
+        <ThemeToggle />
       </div>
-      <Link 
-        to="/" 
-        style={{
-          flex: 1,
-          textDecoration: 'none',
-          textAlign: 'center'
-        }}
-      >
-        <div style={{
-          color: 'var(--color-primary)',
-          fontSize: '2rem',
-          fontWeight: 'bold'
-        }}>
+
+      {/* Center section */}
+      <div style={{ flex: 1, textAlign: 'center', fontWeight: 'bold', fontSize: '40px' }}>
+        <Link to="/" style={{ textDecoration: 'none', color: '#4CAF50' }}>
           AI Meal Planner
-        </div>
-      </Link>
-      <div style={{
-        width: '100px',
-        display: 'flex',
-        justifyContent: 'flex-end',
-        gap: '1rem'
-      }}>
-        <Link 
-          to="/favorites"
-          style={{
-            textDecoration: 'none',
-            color: 'var(--color-text)',
-            padding: '0.5rem 1rem',
-            borderRadius: '20px',
-            border: '1px solid var(--color-border)',
-            fontSize: '1rem',
-            backgroundColor: 'var(--color-button-bg)'
-          }}
-        >
-          {t('favorites')}
+        </Link>
+      </div>
+
+      {/* Right section */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100px', justifyContent: 'flex-end' }}>
+        <Link to="/favorites" style={{ textDecoration: 'none' }}>
+          <button
+            style={{
+              backgroundColor: 'var(--color-button-bg)',
+              border: '1px solid var(--color-border)',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              color: 'var(--color-text)',
+              padding: '8px 16px',
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 6px var(--color-card-shadow)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 4px 8px var(--color-card-shadow)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 6px var(--color-card-shadow)';
+            }}
+          >
+            {t('favorites')}
+          </button>
         </Link>
         <LanguageSelector />
       </div>

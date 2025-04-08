@@ -10,107 +10,21 @@ class Phi3Service
     protected $client;
     protected $apiKey;
     protected $apiUrl;
-    protected $model;
 
     public function __construct()
     {
+        $this->client = new Client();
         $this->apiKey = env('PHI3_API_KEY');
         $this->apiUrl = env('PHI3_API_URL');
-        $this->model = env('PHI3_MODEL_NAME', 'Phi-3-mini-4k-instruct');
-        
-        $this->client = new Client([
-            'verify' => false,  // Disable SSL verification
-            'timeout' => 30,
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer ' . $this->apiKey
-            ]
-        ]);
         
         Log::info("Phi3Service initialized", [
-            'apiUrl' => $this->apiUrl,
-            'model' => $this->model
+            'apiUrl' => $this->apiUrl
         ]);
-    }
-
-    public function generateResponse($prompt)
-    {
-        try {
-            Log::info("Sending request to Phi-3", [
-                'prompt' => $prompt,
-                'model' => $this->model,
-                'url' => $this->apiUrl
-            ]);
-
-            $response = $this->client->post($this->apiUrl, [
-                'json' => [
-                    'model' => $this->model,
-                    'messages' => [
-                        ['role' => 'system', 'content' => 'You are a helpful cooking assistant that provides detailed recipes.'],
-                        ['role' => 'user', 'content' => $prompt]
-                    ],
-                    'temperature' => 0.7,
-                    'max_tokens' => 800
-                ]
-            ]);
-
-            $result = json_decode($response->getBody()->getContents(), true);
-            
-            Log::info("Received response from Phi-3", [
-                'raw_response' => $result
-            ]);
-
-            if (!isset($result['choices'][0]['message']['content'])) {
-                throw new \Exception('Invalid response format from API');
-            }
-
-            $content = $result['choices'][0]['message']['content'];
-            
-            // Parse the response to extract recipe components
-            $meal = '';
-            $ingredients = [];
-            $instructions = '';
-
-            // Extract meal name
-            if (preg_match('/(?:Recipe|Meal):\s*(.+?)(?:\n|$)/i', $content, $matches)) {
-                $meal = trim($matches[1]);
-            }
-
-            // Extract ingredients
-            if (preg_match('/Ingredients:(.*?)(?:Instructions|Directions|Steps|$)/is', $content, $matches)) {
-                $ingredientsList = trim($matches[1]);
-                $ingredients = array_map(function($item) {
-                    return trim(preg_replace('/^[-*•.\s]+/', '', trim($item)));
-                }, explode("\n", $ingredientsList));
-                $ingredients = array_filter($ingredients);
-            }
-
-            // Extract instructions
-            if (preg_match('/(?:Instructions|Directions|Steps):(.*?)$/is', $content, $matches)) {
-                $instructions = trim($matches[1]);
-            } else {
-                $instructions = $content;
-            }
-
-            return [
-                'meal' => $meal ?: 'Custom Recipe',
-                'ingredients' => $ingredients ?: ['Could not parse ingredients'],
-                'instructions' => $instructions ?: 'Could not parse instructions'
-            ];
-
-        } catch (\Exception $e) {
-            Log::error("Phi-3 API Error", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'url' => $this->apiUrl,
-                'model' => $this->model
-            ]);
-            throw new \Exception('Failed to generate recipe: ' . $e->getMessage());
-        }
     }
 
     public function generateMeal(array $ingredients, array $tags)
     {
+        // Create a more detailed prompt for recipe generation
         $prompt = "Create a delicious recipe using these ingredients: " . implode(", ", $ingredients) . ".\n";
         
         if (!empty($tags)) {
@@ -127,70 +41,41 @@ class Phi3Service
             Log::info("Sending recipe generation request to API", [
                 'ingredients' => $ingredients,
                 'preferences' => $tags,
-                'url' => $this->apiUrl,
-                'model' => $this->model
+                'apiUrl' => $this->apiUrl
             ]);
             
             $response = $this->client->post($this->apiUrl, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json',
+                ],
                 'json' => [
-                    'model' => $this->model,
+                    'model' => env('PHI3_MODEL_NAME', 'phi-3'),
                     'messages' => [
                         ['role' => 'system', 'content' => 'You are a helpful assistant that creates detailed recipes.'],
                         ['role' => 'user', 'content' => $prompt]
                     ],
-                    'max_tokens' => 800,
+                    'max_tokens' => 800,  // Increased to allow for longer recipes
                     'temperature' => 0.7
-                ]
+                ],
             ]);
 
             $data = json_decode($response->getBody()->getContents(), true);
-            
-            if (!isset($data['choices'][0]['message']['content'])) {
-                throw new \Exception('Invalid response format from API');
-            }
-            
-            $content = $data['choices'][0]['message']['content'];
-            
-            // Parse the response to extract recipe components
-            $meal = '';
-            $ingredients = [];
-            $instructions = '';
-
-            // Extract meal name
-            if (preg_match('/(?:Recipe|Meal):\s*(.+?)(?:\n|$)/i', $content, $matches)) {
-                $meal = trim($matches[1]);
-            }
-
-            // Extract ingredients
-            if (preg_match('/Ingredients:(.*?)(?:Instructions|Directions|Steps|$)/is', $content, $matches)) {
-                $ingredientsList = trim($matches[1]);
-                $ingredients = array_map(function($item) {
-                    return trim(preg_replace('/^[-*•.\s]+/', '', trim($item)));
-                }, explode("\n", $ingredientsList));
-                $ingredients = array_filter($ingredients);
-            }
-
-            // Extract instructions
-            if (preg_match('/(?:Instructions|Directions|Steps):(.*?)$/is', $content, $matches)) {
-                $instructions = trim($matches[1]);
-            } else {
-                $instructions = $content;
-            }
-
-            return [
-                'meal' => $meal ?: 'Custom Recipe',
-                'ingredients' => $ingredients ?: ['Could not parse ingredients'],
-                'instructions' => $instructions ?: 'Could not parse instructions'
-            ];
-            
-        } catch (\Exception $e) {
-            Log::error("API Error in generateMeal", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'url' => $this->apiUrl,
-                'model' => $this->model
+            Log::info("Received response from API for meal generation", [
+                'responseStructure' => array_keys($data),
+                'hasChoices' => isset($data['choices'])
             ]);
-            throw new \Exception('Failed to generate meal: ' . $e->getMessage());
+            
+            $content = $data['choices'][0]['message']['content'] ?? 'No response from AI.';
+            Log::info("Recipe content received", ['length' => strlen($content)]);
+            return $content;
+        } catch (\Exception $e) {
+            Log::error("API Error in generateMeal: " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'ingredients' => $ingredients,
+                'preferences' => $tags
+            ]);
+            return 'Error generating meal: ' . $e->getMessage();
         }
     }
     
@@ -204,30 +89,31 @@ class Phi3Service
         
         try {
             Log::info("Sending request to Phi3", [
-                'prompt' => $prompt,
-                'url' => $this->apiUrl,
-                'model' => $this->model
+                'prompt' => $prompt
             ]);
             
             $response = $this->client->post($this->apiUrl, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json',
+                ],
                 'json' => [
-                    'model' => $this->model,
+                    'model' => env('PHI3_MODEL_NAME', 'phi-3'),
                     'messages' => [
                         ['role' => 'system', 'content' => 'You are a helpful assistant that creates detailed recipes.'],
                         ['role' => 'user', 'content' => $prompt]
                     ],
                     'max_tokens' => 800,
                     'temperature' => 0.7
-                ]
+                ],
             ]);
             
             $data = json_decode($response->getBody()->getContents(), true);
+            Log::info("Received response from Phi3", [
+                'response' => $data
+            ]);
             
-            if (!isset($data['choices'][0]['message']['content'])) {
-                throw new \Exception('Invalid response format from API');
-            }
-            
-            $recipeText = $data['choices'][0]['message']['content'];
+            $recipeText = $data['choices'][0]['message']['content'] ?? 'No response from AI.';
             
             // Parse the response to extract recipe components
             $meal = $mealName;
@@ -238,32 +124,38 @@ class Phi3Service
             if (preg_match('/Ingredients:(.*?)(?:Instructions|Directions|Steps|$)/is', $recipeText, $matches)) {
                 $ingredientsList = trim($matches[1]);
                 $ingredients = array_map(function($item) {
-                    return trim(preg_replace('/^[-*•.\s]+/', '', trim($item)));
+                    // Remove leading dashes, asterisks, and dots
+                    $item = preg_replace('/^[-*•.\s]+/', '', trim($item));
+                    return $item;
                 }, explode("\n", $ingredientsList));
-                $ingredients = array_filter($ingredients);
+                $ingredients = array_filter($ingredients); // Remove empty items
             }
             
             // Extract instructions
             if (preg_match('/(?:Instructions|Directions|Steps):(.*?)$/is', $recipeText, $matches)) {
                 $instructions = trim($matches[1]);
+                
+                // Format the instructions properly
                 $instructions = preg_replace('/(\d+)\./', '<h3>Step $1</h3>', $instructions);
             }
             
             return [
                 'meal' => $meal,
-                'ingredients' => $ingredients ?: ['Could not parse ingredients'],
-                'instructions' => $instructions ?: 'Could not parse instructions'
+                'ingredients' => $ingredients,
+                'instructions' => $instructions
             ];
             
         } catch (\Exception $e) {
-            Log::error("Phi-3 API Error", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'url' => $this->apiUrl,
-                'model' => $this->model
+            Log::error("Phi-3 API Error: " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
             ]);
             
-            throw new \Exception('Failed to generate recipe: ' . $e->getMessage());
+            // Return a default recipe format with the error
+            return [
+                'meal' => $mealName,
+                'ingredients' => ["Couldn't retrieve ingredients due to API error"],
+                'instructions' => "We're sorry, but we couldn't generate a recipe at this time due to an API error: " . $e->getMessage()
+            ];
         }
     }
 }
