@@ -2,6 +2,8 @@ import React, { useState, useContext } from "react";
 import axios from "axios";
 import { LanguageContext } from '../App';
 import "./IngredientSelector.css";
+import { useNavigate } from "react-router-dom";
+import Cookies from 'js-cookie';
 
 const API_BASE_URL = "/api";
 
@@ -39,6 +41,13 @@ interface MealResponse {
     };
 }
 
+interface FavoriteMeal {
+    id: string;
+    image: string;
+    nameKey: string;
+    calories: number;
+}
+
 const IngredientSelector: React.FC = () => {
     const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -46,6 +55,7 @@ const IngredientSelector: React.FC = () => {
     const [mealResponse, setMealResponse] = useState<MealResponse | null>(null);
     const [loading, setLoading] = useState(false);
     const { t } = useContext(LanguageContext);
+    const navigate = useNavigate();
 
     const toggleIngredient = (ingredient: string) => {
         setSelectedIngredients((prev) =>
@@ -82,15 +92,95 @@ const IngredientSelector: React.FC = () => {
         }
     };
 
+    const addToFavorites = () => {
+        if (!mealResponse) return;
+
+        const savedFavorites = Cookies.get('favorites');
+        let favorites: FavoriteMeal[] = [];
+        
+        if (savedFavorites) {
+            try {
+                favorites = JSON.parse(savedFavorites);
+            } catch (e) {
+                console.error('Error parsing favorites:', e);
+            }
+        }
+
+        // Check if meal is already in favorites
+        const isFavorite = favorites.some(fav => fav.nameKey === mealResponse.meal);
+        
+        if (!isFavorite) {
+            const cleanMealName = mealResponse.meal.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/).join('-');
+            
+            const newFavorite: FavoriteMeal = {
+                id: Math.random().toString(36).substr(2, 9),
+                nameKey: mealResponse.meal,
+                image: `https://source.unsplash.com/400x300/?${cleanMealName}`,
+                calories: Math.floor(Math.random() * (800 - 300) + 300)
+            };
+            
+            favorites.push(newFavorite);
+
+            try {
+                Cookies.set('favorites', JSON.stringify(favorites), { 
+                    expires: 365,
+                    path: '/',
+                    sameSite: 'lax',
+                    secure: false
+                });
+            } catch (error) {
+                console.error('Error saving cookie:', error);
+            }
+        }
+        // Always navigate to favorites page
+        navigate('/favorites');
+    };
+
     const filteredIngredients = INGREDIENTS_LIST.filter(ingredient =>
         t(ingredient).toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
         <div className="ingredient-selector-container">
-            <div className="ingredient-selector-header">
+            <div className="ingredient-selector-header" style={{ position: 'relative' }}>
                 <h2>{t('selectIngredients')}</h2>
                 <p className="subtitle">{t('chooseIngredients')}</p>
+                
+                {/* Favorites Button - only show when a meal is generated */}
+                {mealResponse && (
+                    <button
+                        onClick={addToFavorites}
+                        style={{
+                            position: 'absolute',
+                            top: '0',
+                            right: '0',
+                            width: '45px',
+                            height: '45px',
+                            backgroundColor: 'var(--color-button-bg)',
+                            color: '#4CAF50',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontSize: '24px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s ease',
+                            boxShadow: '0 2px 6px var(--color-card-shadow)',
+                            zIndex: 10
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 4px 8px var(--color-card-shadow)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 2px 6px var(--color-card-shadow)';
+                        }}
+                    >
+                        ⭐
+                    </button>
+                )}
             </div>
 
             <div className="search-container">
