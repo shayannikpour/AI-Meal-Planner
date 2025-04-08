@@ -5,7 +5,7 @@ import { LanguageContext } from "../App";
 import Cookies from 'js-cookie';
 import "./MealSelection.css";
 
-const API_BASE_URL = "http://127.0.0.1:8000/api"; // Laravel API base URL
+const API_BASE_URL = "/api"; // Use relative URL instead of hardcoded
 
 interface FavoriteMeal {
   id: string;
@@ -516,7 +516,21 @@ const MealSelection = () => {
                 {Array.isArray(mealResponse.ingredients) ? (
                   mealResponse.ingredients.map((ingredient, idx) => (
                     <li key={idx} style={{ marginBottom: "0.5rem" }}>
-                      {ingredient}
+                      {ingredient.includes('<strong>') ? (
+                        <div dangerouslySetInnerHTML={{ __html: ingredient }} />
+                      ) : (
+                        ingredient
+                      )}
+                    </li>
+                  ))
+                ) : typeof mealResponse.ingredients === 'object' ? (
+                  Object.values(mealResponse.ingredients).map((ingredient, idx) => (
+                    <li key={idx} style={{ marginBottom: "0.5rem" }}>
+                      {typeof ingredient === 'string' && ingredient.includes('<strong>') ? (
+                        <div dangerouslySetInnerHTML={{ __html: ingredient }} />
+                      ) : (
+                        ingredient
+                      )}
                     </li>
                   ))
                 ) : (
@@ -547,9 +561,8 @@ const MealSelection = () => {
                   backgroundColor: "var(--color-button-bg)",
                   borderRadius: "6px",
                 }}
-              >
-                {mealResponse.instructions || t("noInstructions")}
-              </div>
+                dangerouslySetInnerHTML={{ __html: mealResponse.instructions || t("noInstructions") }}
+              />
             </div>
           </div>
 

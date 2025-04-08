@@ -3,7 +3,7 @@ import axios from "axios";
 import { LanguageContext } from '../App';
 import "./IngredientSelector.css";
 
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = "/api";
 
 const DIETARY_TAGS = [
     "weightLoss",

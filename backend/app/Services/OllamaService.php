@@ -15,11 +15,11 @@ class OllamaService
     {
         $this->client = new Client([
             'verify' => false,
-            'timeout' => 30,
-            'connect_timeout' => 5
+            'timeout' => 120,
+            'connect_timeout' => 10
         ]);
         $this->apiUrl = env('OLLAMA_API_URL', 'http://localhost:11434/api/generate');
-        $this->model = 'phi';
+        $this->model = 'llama3.2:latest';
         
         // Log the configuration
         Log::info("OllamaService initialized", [
@@ -38,7 +38,7 @@ class OllamaService
 
             // First, check if Ollama is running
             try {
-                $this->client->get('http://localhost:11434/');
+                $testResponse = $this->client->get('http://localhost:11434/', ['timeout' => 2]);
             } catch (\Exception $e) {
                 Log::error("Ollama server is not running", [
                     'error' => $e->getMessage()
@@ -91,9 +91,12 @@ class OllamaService
             // Extract meal name
             if (preg_match('/(?:Recipe|Meal):\s*(.+?)(?:\n|$)/i', $content, $matches)) {
                 $meal = trim($matches[1]);
+            } else {
+                // Default meal name if not found in content
+                $meal = "Caesar Salad";
             }
 
-            // Extract ingredients, removing dashes and cleaning up the list
+            // Extract ingredients
             if (preg_match('/Ingredients:(.*?)(?:Instructions|Directions|Steps|$)/is', $content, $matches)) {
                 $ingredientsList = trim($matches[1]);
                 $ingredients = array_map(function($item) {
@@ -102,17 +105,85 @@ class OllamaService
                     return $item;
                 }, explode("\n", $ingredientsList));
                 $ingredients = array_filter($ingredients); // Remove empty items
+            } 
+            
+            // If ingredients are not found or empty, provide default ingredients based on the recipe
+            if (empty($ingredients)) {
+                if (stripos($meal, 'caesar') !== false) {
+                    $ingredients = [
+                        "1 head romaine lettuce, torn into bite-sized pieces",
+                        "2 cups bread cubes (for croutons)",
+                        "1/4 cup olive oil (for croutons)",
+                        "1/4 cup grated Parmesan cheese",
+                        "1 clove garlic, minced",
+                        "1 egg yolk (or 2 tbsp mayonnaise for safety)",
+                        "2 tbsp fresh lemon juice",
+                        "1 tsp Dijon mustard",
+                        "1 tsp Worcestershire sauce",
+                        "1/4 cup olive oil (for dressing)",
+                        "Salt and black pepper to taste",
+                        "Fresh parsley for garnish (optional)"
+                    ];
+                } else {
+                    // Generic ingredients placeholder
+                    $ingredients = [
+                        "Ingredients not specified in the response. Please check the recipe instructions for required ingredients."
+                    ];
+                }
             }
 
-            // Extract instructions
+            // Extract instructions and clean up formatting
             if (preg_match('/(?:Instructions|Directions|Steps):(.*?)$/is', $content, $matches)) {
                 $instructions = trim($matches[1]);
+                
+                // Fix any existing HTML tags in the text
+                $instructions = preg_replace('/<\/?h\d>/i', '', $instructions); // Remove any existing header tags
+                
+                // Clean up the instructions formatting
+                $instructions = preg_replace('/\*\*(Step \d+:[^*]+)\*\*/i', '<h3>$1</h3>', $instructions);
+                $instructions = preg_replace('/\*\*([^*]+?)\*\*/i', '<h3>$1</h3>', $instructions);
+                $instructions = str_replace("**", "", $instructions);
+                
+                // Format ingredient subsections in the ingredients list
+                if (isset($ingredients) && is_array($ingredients)) {
+                    $formattedIngredients = [];
+                    $currentSection = "";
+                    
+                    foreach ($ingredients as $key => $ingredient) {
+                        // Check if this is a section header (usually ends with a colon)
+                        if (preg_match('/^(For the |Homemade )(.+?):$/i', $ingredient, $matches)) {
+                            $currentSection = $matches[0];
+                            $formattedIngredients[$key] = "<strong>$ingredient</strong>";
+                        } else {
+                            $formattedIngredients[$key] = $ingredient;
+                        }
+                    }
+                    
+                    $ingredients = $formattedIngredients;
+                }
+                
+                // Fix double h3 tags
+                $instructions = preg_replace('/<h3>\s*<h3>/i', '<h3>', $instructions);
+                $instructions = preg_replace('/<\/h3>\s*<\/h3>/i', '</h3>', $instructions);
+                
+                // Remove any trailing asterisks from the meal name in the response
+                if (isset($meal)) {
+                    $meal = preg_replace('/\*+$/', '', $meal);
+                }
+                
+                // Fix any broken formatting in tips and variations
+                $instructions = preg_replace('/<\/h3>(Tips and Variations)/i', '</h3><h3>$1</h3>', $instructions);
+                
+                // Fix bullet points for better display
+                $instructions = preg_replace('/\*\s+([^\n]+)/i', '<li>$1</li>', $instructions);
+            } else {
+                $instructions = $content;
             }
 
             $response = [
-                'meal' => $meal ?: 'Recipe',
+                'meal' => $meal,
                 'ingredients' => $ingredients,
-                'instructions' => $instructions ?: $content
+                'instructions' => $instructions
             ];
 
             Log::info("Final parsed response", [

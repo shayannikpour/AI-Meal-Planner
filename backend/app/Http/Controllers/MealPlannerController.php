@@ -7,14 +7,17 @@ use Illuminate\Support\Facades\DB;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 use App\Services\OllamaService;
+use App\Services\Phi3Service;
 
 class MealPlannerController extends Controller
 {
     protected $ollamaService;
+    protected $phi3Service;
 
-    public function __construct(OllamaService $ollamaService)
+    public function __construct(OllamaService $ollamaService, Phi3Service $phi3Service)
     {
         $this->ollamaService = $ollamaService;
+        $this->phi3Service = $phi3Service;
     }
 
     // Fetch all ingredients
@@ -34,34 +37,55 @@ class MealPlannerController extends Controller
     {
         try {
             $ingredients = $request->input('ingredients', []);
+            // Support both 'preferences' and 'tags' parameter names from frontend
             $preferences = $request->input('preferences', []);
+            $tags = $request->input('tags', []);
+            
+            // Combine preferences and tags if both are provided
+            $dietaryPreferences = !empty($tags) ? $tags : $preferences;
 
-            // Format ingredients and preferences for the prompt
-            $ingredientsList = implode(', ', $ingredients);
-            $preferencesList = implode(', ', $preferences);
-
-            // Build the prompt
-            $prompt = "Generate a recipe using these ingredients: $ingredientsList\n\n";
-            if (!empty($preferences)) {
-                $prompt .= "Consider these dietary preferences: $preferencesList\n\n";
+            // Directly use Phi3Service without trying Ollama first
+            $response = $this->phi3Service->generateMeal($ingredients, $dietaryPreferences);
+            
+            // Format the response to match the expected structure if needed
+            if (is_string($response)) {
+                // Parse the text response
+                $meal = '';
+                $ingredientList = [];
+                $instructions = '';
+                
+                // Extract meal name
+                if (preg_match('/Recipe:\s*(.+?)(?:\n|$)/i', $response, $matches)) {
+                    $meal = trim($matches[1]);
+                }
+                
+                // Extract ingredients
+                if (preg_match('/Ingredients:(.*?)(?:Instructions|Directions|Steps|$)/is', $response, $matches)) {
+                    $ingredientText = trim($matches[1]);
+                    $ingredientList = array_map('trim', explode("\n", $ingredientText));
+                    $ingredientList = array_filter($ingredientList);
+                }
+                
+                // Extract instructions
+                if (preg_match('/(?:Instructions|Directions|Steps):(.*?)$/is', $response, $matches)) {
+                    $instructions = trim($matches[1]);
+                }
+                
+                $response = [
+                    'meal' => $meal ?: 'Recipe with ' . implode(', ', $ingredients),
+                    'ingredients' => $ingredientList,
+                    'instructions' => $instructions ?: $response
+                ];
             }
-            $prompt .= "Please provide the recipe in this format:\n";
-            $prompt .= "Recipe: [Recipe Name]\n";
-            $prompt .= "Ingredients: [List all required ingredients with quantities]\n";
-            $prompt .= "Instructions: [Step by step cooking instructions]\n";
-            $prompt .= "\nMake sure to use the available ingredients: $ingredientsList";
-
-            $response = $this->ollamaService->generateResponse($prompt);
             
             return response()->json($response)
                 ->header('Access-Control-Allow-Origin', '*')
                 ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
                 ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
         } catch (\Exception $e) {
-            Log::error('Meal generation error: ' . $e->getMessage());
+            Log::error('Recipe generation error: ' . $e->getMessage());
             return response()->json([
-                'error' => 'Failed to generate meal suggestion. Please try again.',
+                'error' => 'Failed to generate recipe. Please try again.',
                 'details' => $e->getMessage()
             ], 500)
                 ->header('Access-Control-Allow-Origin', '*')
@@ -83,13 +107,8 @@ class MealPlannerController extends Controller
         $formattedMeal = ucwords($formattedMeal);
 
         try {
-            $prompt = "Generate a detailed recipe for $formattedMeal with the following format:\n\n";
-            $prompt .= "Recipe: $formattedMeal\n\n";
-            $prompt .= "Ingredients:\n[List of ingredients with quantities]\n\n";
-            $prompt .= "Instructions:\n[Step by step cooking instructions]\n\n";
-            $prompt .= "Please provide the recipe in a clear, easy to follow format.";
-            
-            $response = $this->ollamaService->generateResponse($prompt);
+            // Directly use Phi3Service without trying Ollama first
+            $response = $this->phi3Service->generateRecipeFormat($formattedMeal);
             
             return response()->json($response)
                 ->header('Access-Control-Allow-Origin', '*')
@@ -117,20 +136,13 @@ class MealPlannerController extends Controller
                 return response()->json(['error' => 'Meal name or issue missing.'], 400);
             }
 
-            // Build a prompt that includes the current recipe and the modification request
-            $prompt = "I have a recipe for $meal and here's my request: $issue\n\n";
-            $prompt .= "Please provide an adjusted recipe that addresses this issue. Format the response as:\n\n";
-            $prompt .= "Recipe: [Recipe Name]\n";
-            $prompt .= "Ingredients: [List all required ingredients with quantities]\n";
-            $prompt .= "Instructions: [Step by step cooking instructions]\n";
-            
-            $response = $this->ollamaService->generateResponse($prompt);
+            // Directly use Phi3Service without trying Ollama first
+            $response = $this->phi3Service->generateRecipeFormat($meal . " (refined: $issue)");
             
             return response()->json($response)
                 ->header('Access-Control-Allow-Origin', '*')
                 ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
                 ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
         } catch (\Exception $e) {
             Log::error('Recipe refinement error: ' . $e->getMessage());
             return response()->json([
