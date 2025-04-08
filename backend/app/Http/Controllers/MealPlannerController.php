@@ -36,11 +36,11 @@ class MealPlannerController extends Controller
     public function generateMeal(Request $request)
     {
         try {
-            $ingredients = $request->input('ingredients', []);
+        $ingredients = $request->input('ingredients', []);
             // Support both 'preferences' and 'tags' parameter names from frontend
             $preferences = $request->input('preferences', []);
-            $tags = $request->input('tags', []);
-            
+        $tags = $request->input('tags', []);
+
             // Combine preferences and tags if both are provided
             $dietaryPreferences = !empty($tags) ? $tags : $preferences;
 
@@ -102,39 +102,58 @@ class MealPlannerController extends Controller
             return response()->json(['error' => 'No meal selected.'], 400);
         }
 
-        // Format the meal name by converting from snake_case to Title Case
-        $formattedMeal = str_replace('_', ' ', $meal);
-        $formattedMeal = ucwords($formattedMeal);
-
         try {
-            // Directly use Phi3Service without trying Ollama first
+            // Clean up the meal name
+            $formattedMeal = trim($meal);
+            
+            Log::info('Generating recipe for meal', [
+                'original' => $meal,
+                'formatted' => $formattedMeal
+            ]);
+            
+            // Use Phi3Service to generate the recipe
             $response = $this->phi3Service->generateRecipeFormat($formattedMeal);
             
-            return response()->json($response)
-                ->header('Access-Control-Allow-Origin', '*')
-                ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-                ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+            // Ensure the response has the correct structure
+            if (!isset($response['meal']) || !isset($response['ingredients']) || !isset($response['instructions'])) {
+                throw new \Exception('Invalid response format from service');
+            }
+            
+            return response()->json([
+                'meal' => $response['meal'],
+                'ingredients' => $response['ingredients'],
+                'instructions' => $response['instructions']
+            ])
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+            
         } catch (\Exception $e) {
-            Log::error('Recipe generation error: ' . $e->getMessage());
+            Log::error('Recipe generation error', [
+                'error' => $e->getMessage(),
+                'meal' => $meal,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'error' => 'Failed to generate recipe. Please try again.',
                 'details' => $e->getMessage()
             ], 500)
-                ->header('Access-Control-Allow-Origin', '*')
-                ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-                ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         }
     }
 
     public function refineRecipe(Request $request)
     {
         try {
-            $meal = $request->input('meal');
-            $issue = $request->input('issue');
+        $meal = $request->input('meal');
+        $issue = $request->input('issue');
 
-            if (!$meal || !$issue) {
-                return response()->json(['error' => 'Meal name or issue missing.'], 400);
-            }
+        if (!$meal || !$issue) {
+            return response()->json(['error' => 'Meal name or issue missing.'], 400);
+        }
 
             // Directly use Phi3Service without trying Ollama first
             $response = $this->phi3Service->generateRecipeFormat($meal . " (refined: $issue)");

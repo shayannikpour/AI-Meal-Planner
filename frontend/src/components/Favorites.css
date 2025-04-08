@@ -7,7 +7,6 @@
     box-shadow: 0 4px 20px var(--color-card-shadow);
 }
 
-
 .back-button {
     background-color: var(--color-button-bg);
     color: var(--color-text);
@@ -107,4 +106,7 @@
 
 .remove-favorite:hover {
     background-color: #ff4444;
+}
+
+.favorite-item {
 } 

@@ -273,27 +273,19 @@ const MealSelection = () => {
               position: 'absolute',
               top: '20px',
               right: '20px',
-              width: '40px',
-              height: '40px',
-              backgroundColor: 'var(--color-button-bg)',
-              color: '#4CAF50',
-              border: '1px solid var(--color-border)',
-              borderRadius: '12px',
+              width: '50px',
+              height: '50px',
+              backgroundColor: 'var(--color-primary)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
               cursor: 'pointer',
-              fontSize: '20px',
+              fontSize: '24px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 6px var(--color-card-shadow)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 4px 8px var(--color-card-shadow)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 2px 6px var(--color-card-shadow)';
+              transition: 'all 0.3s ease',
+              boxShadow: '0 2px 5px var(--color-card-shadow)'
             }}
           >
             ⭐
