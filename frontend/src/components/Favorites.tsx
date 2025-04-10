@@ -239,8 +239,11 @@ const Favorites: React.FC = () => {
                 <h2 style={{ 
                     color: 'var(--color-text)', 
                     textAlign: 'center', 
-                    marginBottom: '1rem',
-                    fontSize: '2rem'
+                    marginBottom: '1.5rem',
+                    fontSize: '2.2rem',
+                    fontWeight: '600',
+                    padding: '0.5rem 0',
+                    borderBottom: '2px solid var(--color-border)'
                 }}>
                     {t('favorites')}
                 </h2>
@@ -446,12 +449,15 @@ const Favorites: React.FC = () => {
                                         }}>
                                             {t('instructions')}
                                         </h4>
-                                        <div style={{
-                                            color: 'var(--color-text-secondary)',
-                                            lineHeight: '1.6',
-                                            whiteSpace: 'pre-line'
-                                        }}>
-                                            {mealResponse.instructions}
+                                        <div
+                                            className="instructions-text"
+                                            style={{
+                                                color: 'var(--color-text-secondary)',
+                                                lineHeight: '1.6',
+                                                whiteSpace: 'pre-line'
+                                            }}
+                                            dangerouslySetInnerHTML={{ __html: mealResponse.instructions || t("noInstructions") }}
+                                        >
                                         </div>
                                     </div>
                                 </div>

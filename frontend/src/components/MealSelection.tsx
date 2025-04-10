@@ -24,6 +24,7 @@ const MealSelection = () => {
   const [userInput, setUserInput] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [refiningLoading, setRefiningLoading] = useState(false);
+  const [adjustmentSuccess, setAdjustmentSuccess] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [activeRow, setActiveRow] = useState<string | null>(null);
@@ -180,6 +181,7 @@ const MealSelection = () => {
   const refineRecipe = async () => {
     if (!mealResponse) return;
     setRefiningLoading(true);
+    setAdjustmentSuccess(false);
 
     try {
       const response = await axios.post(`${API_BASE_URL}/refine-recipe`, {
@@ -188,6 +190,11 @@ const MealSelection = () => {
       });
       setMealResponse(response.data);
       setUserInput("");
+      setAdjustmentSuccess(true);
+      // Auto-hide success message after 3 seconds
+      setTimeout(() => {
+        setAdjustmentSuccess(false);
+      }, 3000);
     } catch (error) {
       console.error("Error refining recipe:", error);
     } finally {
@@ -527,9 +534,9 @@ const MealSelection = () => {
                   Object.values(mealResponse.ingredients).map((ingredient, idx) => (
                     <li key={idx} style={{ marginBottom: "0.5rem" }}>
                       {typeof ingredient === 'string' && ingredient.includes('<strong>') ? (
-                        <div dangerouslySetInnerHTML={{ __html: ingredient }} />
+                        <div dangerouslySetInnerHTML={{ __html: ingredient as string }} />
                       ) : (
-                        ingredient
+                        typeof ingredient === 'string' || typeof ingredient === 'number' ? ingredient : String(ingredient)
                       )}
                     </li>
                   ))
@@ -616,22 +623,33 @@ const MealSelection = () => {
                   {t("askAI")}
                 </button>
               ) : (
-                <button
-                  style={{
-                    padding: "0.8rem 1.5rem",
-                    backgroundColor: "var(--color-border)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontWeight: 500,
-                    minWidth: "100px",
-                  }}
-                  disabled
-                >
-                  {t("aiThinking")}
-                </button>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100px" }}>
+                  <div
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      border: "3px solid rgba(0, 0, 0, 0.1)",
+                      borderLeftColor: "#4CAF50",
+                      borderRadius: "50%",
+                      animation: "spin 1s linear infinite",
+                    }}
+                  />
+                </div>
               )}
             </div>
+            {adjustmentSuccess && (
+              <div style={{ 
+                marginTop: "0.8rem", 
+                padding: "0.5rem", 
+                backgroundColor: "#e8f5e9", 
+                color: "#2e7d32", 
+                borderRadius: "4px",
+                textAlign: "center",
+                animation: "fadeIn 0.3s ease-in-out"
+              }}>
+                {t("adjustmentCompleted") || "Adjustment completed successfully!"}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -21,6 +21,11 @@
   to { transform: rotate(360deg); }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .meal-selection-container {
   max-width: 1000px;
   margin: 0 auto;
@@ -255,13 +260,6 @@
   gap: 10px;
 }
 
-.refinement-input {
-  flex: 1;
-  padding: 0.8
-
-}
-
-/* MealSelection.css (continued) */
 .refinement-input {
   flex: 1;
   padding: 0.8rem 1rem;
